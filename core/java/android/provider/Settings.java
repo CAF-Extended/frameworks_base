@@ -4994,6 +4994,13 @@ public final class Settings {
          */
         public static final String ON_THE_GO_CAMERA = "on_the_go_camera";
 
+
+        /**
+         * Volume rocker wake
+         * @hide
+         */
+        public static final String VOLUME_ROCKER_WAKE = "volume_rocker_wake";
+
         /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
