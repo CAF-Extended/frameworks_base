@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.MobileDataIndicators;
 import com.android.systemui.statusbar.policy.NetworkController.WifiIndicators;
+import com.android.systemui.statusbar.policy.NetworkController.ImsIconState;
 import com.android.systemui.statusbar.policy.NetworkControllerImpl;
 import com.android.systemui.statusbar.policy.SecurityController;
 import com.android.systemui.tuner.TunerService;
@@ -60,7 +61,7 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
     private final String mSlotVpn;
     private final String mSlotNoCalling;
     private final String mSlotCallStrength;
-
+    private final String mSlotIms;
     private final Context mContext;
     private final StatusBarIconController mIconController;
     private final NetworkController mNetworkController;
@@ -117,6 +118,8 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         mActivityEnabled = mContext.getResources().getBoolean(R.bool.config_showActivity);
 
         tunerService.addTunable(this, StatusBarIconController.ICON_HIDE_LIST, USE_OLD_MOBILETYPE);
+        mSlotIms      = mContext.getString(com.android.internal.R.string.status_bar_ims);
+
         mNetworkController.addCallback(this);
         mSecurityController.addCallback(this);
     }
@@ -508,8 +511,14 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
             }
             return outStates;
         }
+
     }
 
+    @Override
+    public void setImsIcon(ImsIconState icon) {
+        mIconController.setImsIcon(mSlotIms, icon);    
+    }
+    
     private static abstract class SignalIconState {
         public boolean visible;
         public boolean activityOut;

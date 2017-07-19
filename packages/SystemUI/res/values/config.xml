@@ -668,6 +668,10 @@
         <!-- sensorLocationY -->
         <!--sensorRadius -->
     </integer-array>
+    
+    <!-- Whether to show VoLTE icon in the status bar -->
+    <bool name="config_display_volte">true</bool>
+    <bool name="config_display_vowifi">true</bool>
 
     <!-- Overrides the behavior of the face unlock keyguard bypass setting:
          0 - Don't override the setting (default)
