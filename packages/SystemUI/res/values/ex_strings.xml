@@ -110,4 +110,8 @@
     <string name="navigation_bar_inverse_summary">Swap the order of recents and back buttons</string>
     <string name="navigation_bar_accessibility_dpad_left">Cursor left</string>
     <string name="navigation_bar_accessibility_dpad_right">Cursor right</string>
+
+    <!-- Name of the volte/vowifi status bar icon. -->
+    <string name="status_bar_ims">VoLTE/VoWiFi</string>
+
 </resources>
