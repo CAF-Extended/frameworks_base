@@ -189,6 +189,8 @@ public abstract class PanelViewController {
     protected final SysuiStatusBarStateController mStatusBarStateController;
     protected final AmbientState mAmbientState;
 
+    protected boolean mDoubleTapToSleepEnabled;
+
     protected void onExpandingFinished() {
         mBar.onExpandingFinished();
     }
@@ -1318,7 +1320,7 @@ public abstract class PanelViewController {
                         onTrackingStarted();
                     }
                     if (isFullyCollapsed() && !mHeadsUpManager.hasPinnedHeadsUp()
-                            && !mStatusBar.isBouncerShowing()) {
+                            && !mStatusBar.isBouncerShowing() && !mDoubleTapToSleepEnabled) {
                         startOpening(event);
                     }
                     break;
