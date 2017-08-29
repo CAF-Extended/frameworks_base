@@ -1999,6 +1999,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.PULSE_ON_NEW_TRACKS),
                     false, this, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.DOUBLE_TAP_SLEEP_GESTURE),
+                    false, this, UserHandle.USER_ALL);
         }
 
         @Override
@@ -2019,6 +2022,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
 
         public void update() {
+            if (mNotificationShadeWindowViewController != null) {
+                mNotificationShadeWindowViewController.updateSettings();
+            }
             setFpToDismissNotifications();
             updateQsPanelResources();
             setPulseOnNewTracks();
