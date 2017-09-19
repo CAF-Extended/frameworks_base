@@ -46,6 +46,7 @@
         <item>airplane</item>
         <item>settings</item>
         <item>lockdown</item>
+        <item>torch</item>        
     </string-array>
 
     <!-- The list of vendor package signatures that should also be considered
