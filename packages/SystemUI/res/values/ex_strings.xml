@@ -32,7 +32,9 @@
     <string name="quick_settings_location_secondary_high_accuracy">High Accuracy</string>
     <string name="accessibility_quick_settings_location_high_accuracy">Location reporting: high accuracy mode.</string>
     
-    <!-- Statusbar tuner -->
+    <!-- SystemUI Tuner -->
     <string name="statusbar_items_title">Statusbar icon</string>
+    <string name="lockscreen_default">Default</string>
+    <string name="lockscreen_hidden">None</string>
 
 </resources>
