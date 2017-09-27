@@ -35,6 +35,7 @@ import com.android.systemui.qs.tiles.CastTile;
 import com.android.systemui.qs.tiles.CellularTile;
 import com.android.systemui.qs.tiles.CPUInfoTile;
 import com.android.systemui.qs.tiles.ColorInversionTile;
+import com.android.systemui.qs.tiles.CompassTile;
 import com.android.systemui.qs.tiles.DataSaverTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
@@ -89,6 +90,7 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<OnTheGoTile> mOnTheGoTileProvider;
     private final Provider<CPUInfoTile> mCPUInfoTileProvider;
     private final Provider<FPSInfoTile> mFPSInfoTileProvider;
+    private final Provider<CompassTile> mCompassTileProvider;
 
     private final Lazy<QSHost> mQsHostLazy;
 
@@ -118,8 +120,8 @@ public class QSFactoryImpl implements QSFactory {
             Provider<AlwaysOnDisplayTile> alwaysOnDisplayTileProvider,
             Provider<CPUInfoTile> cpuInfoTileProvider,
             Provider<OnTheGoTile> onTheGoTileProvider,
-            Provider<FPSInfoTile> fpsInfoTileProvider) {
-            
+            Provider<FPSInfoTile> fpsInfoTileProvider,            
+            Provider<CompassTile> compassTileProvider) {
         mQsHostLazy = qsHostLazy;
         mWifiTileProvider = wifiTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
@@ -146,6 +148,7 @@ public class QSFactoryImpl implements QSFactory {
         mCPUInfoTileProvider = cpuInfoTileProvider;
         mOnTheGoTileProvider = onTheGoTileProvider;
         mFPSInfoTileProvider = fpsInfoTileProvider;
+        mCompassTileProvider = compassTileProvider;
     }
 
 
@@ -208,6 +211,8 @@ public class QSFactoryImpl implements QSFactory {
                 return mOnTheGoTileProvider.get();
             case "fpsinfo":
                 return mFPSInfoTileProvider.get();
+            case "compass":
+                return mCompassTileProvider.get();
         }
 
         // Custom tiles
