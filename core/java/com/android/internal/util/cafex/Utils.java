@@ -20,10 +20,15 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.om.IOverlayManager;
+import android.content.om.OverlayInfo;
+import android.os.UserHandle;
+import android.os.Vibrator;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
+
 import android.graphics.Color;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -56,6 +61,8 @@ import java.util.List;
 import java.util.Locale;
 
 public class Utils {
+
+    private static OverlayManager mOverlayService;
 
     // Check to see if device is WiFi only
     public static boolean isWifiOnly(Context context) {
