@@ -14,12 +14,10 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-  <!-- Power menu -->
-  <java-symbol type="array" name="config_rebootActionsList" />
-
-  <!-- Flashlight proximity check -->
-  <java-symbol type="integer" name="config_flashlightProximityTimeout" />
+  <!-- Time to give to the proximity sensor before toggling the flashlight with the Power button.
+       Set to -1 to disable the proximity sensor check at all-->
+  <integer name="config_flashlightProximityTimeout">300</integer>
 
 </resources>
