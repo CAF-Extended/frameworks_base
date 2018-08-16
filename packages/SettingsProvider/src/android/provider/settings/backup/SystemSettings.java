@@ -101,5 +101,6 @@ public class SystemSettings {
         Settings.System.DOUBLE_TAP_SLEEP_LOCKSCREEN,
         Settings.System.NOTIFICATION_HEADERS,
         Settings.System.CENTER_NOTIFICATION_HEADERS,
+        Settings.System.LOCKSCREEN_BATTERY_INFO,
     };
 }
