@@ -28,6 +28,7 @@ import android.widget.ImageView;
 import android.service.quicksettings.Tile;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
+import com.android.internal.util.cafex.Utils;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
@@ -163,6 +164,11 @@ public class CompassTile extends QSTileImpl<BooleanState> implements SensorEvent
         } else {
             return mContext.getString(R.string.accessibility_quick_settings_compass_changed_off);
         }
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return Utils.deviceHasCompass(mContext);
     }
 
     @Override
