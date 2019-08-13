@@ -26,5 +26,8 @@
         compass,music,screenshot,reboot,usb_tether,caffeine,heads_up,locale,sound,volume_panel,dataswitch
     </string>
 
+    <!-- Asus stitch editor component name -->
+    <string name="config_stitchEditor">com.asus.stitchimage/com.asus.stitchimage.editor.ScreenshotEditorActivity</string>
+
 </resources>
 
