@@ -103,4 +103,7 @@
     <string name="applock_fingerprint">&#160;or your fingerprint to unlock</string>
     <string name="applock_credential">&#160;to unlock</string>
     <string name="applock_unlock">Unlock</string>
+    <!-- Navbar -->
+    <string name="systemui_tuner_navbar_title">Layout</string>
+    <string name="navigation_bar_format_title">Navbar format</string>
 </resources>
