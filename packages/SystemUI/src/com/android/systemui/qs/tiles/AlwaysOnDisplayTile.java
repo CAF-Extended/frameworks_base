@@ -23,6 +23,9 @@ import android.content.Intent;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.service.quicksettings.Tile;
+import android.database.ContentObserver;
+import android.net.Uri;
+import android.os.UserHandle;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
