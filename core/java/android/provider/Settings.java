@@ -5386,6 +5386,12 @@ public final class Settings {
          */
         public static final String FLASHLIGHT_ON_CALL = "flashlight_on_call";
 
+	/**
+         * Whether to use new QS panel bg tint or not
+         * @hide
+         */
+        public static final String QS_PANEL_BG_USE_NEW_TINT = "qs_panel_bg_use_new_tint";
+
         /**
          * Whether flashlight_on_call ignores DND (Zen Mode)
          * @hide
@@ -5725,6 +5731,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(FORCE_FULLSCREEN_CUTOUT_APPS);
             PRIVATE_SETTINGS.add(VOLUME_PANEL_ON_LEFT);
             PRIVATE_SETTINGS.add(SYSTEMUI_PLUGIN_VOLUME);
+      	    PRIVATE_SETTINGS.add(QS_PANEL_BG_USE_NEW_TINT);
         }
 
         /**
