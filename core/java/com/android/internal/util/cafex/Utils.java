@@ -16,6 +16,8 @@
 
 package com.android.internal.util.cafex;
 
+import android.app.ActivityManagerNative;
+import android.app.UiModeManager;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
@@ -305,6 +307,15 @@ public class Utils {
         return dest;
     }
     
+    // Method to detect whether the system dark theme is enabled or not
+    public static boolean isDarkTheme(Context context) {
+        UiModeManager mUiModeManager =
+                context.getSystemService(UiModeManager.class);
+        if (mUiModeManager == null) return false;
+        int mode = mUiModeManager.getNightMode();
+        return (mode == UiModeManager.MODE_NIGHT_YES);
+    }
+
     public static int getThemeAccentColor (final Context context) {
         final TypedValue value = new TypedValue ();
         context.getTheme ().resolveAttribute (android.R.attr.colorAccent, value, true);
