@@ -5247,6 +5247,13 @@ public final class Settings {
          */
         public static final String POCKET_JUDGE = "pocket_judge";
 
+
+        /**
+         * Whether to show lock icon on lockscreen
+         * @hide
+         */
+        public static final String LOCKSCREEN_LOCK_ICON = "lockscreen_lock_icon";
+
         /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
