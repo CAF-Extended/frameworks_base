@@ -34,5 +34,8 @@
 
     <!-- Whether to show a custom view for FOD -->
     <java-symbol type="bool" name="config_needCustomFODView" />
+
+  <!-- Themes -->
+  <java-symbol type="color" name="theme_generic_semi_transparent_color" />
         
 </resources>
