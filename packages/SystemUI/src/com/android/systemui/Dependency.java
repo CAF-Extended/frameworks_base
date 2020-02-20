@@ -331,6 +331,7 @@ public class Dependency {
     @Inject Lazy<MediaOutputDialogFactory> mMediaOutputDialogFactory;
     @Inject Lazy<PulseController> mPulseController;
     @Inject Lazy<ScreenDecorations> mScreenDecorations;
+    @Inject Lazy<CustomSettingsService> mCustomSettingsService;
 
     @Inject
     public Dependency() {
@@ -533,6 +534,7 @@ public class Dependency {
         mProviders.put(MediaOutputDialogFactory.class, mMediaOutputDialogFactory::get);
 
         mProviders.put(ScreenDecorations.class, mScreenDecorations::get);
+        mProviders.put(CustomSettingsService.class, mCustomSettingsService::get);
 
         sDependency = this;
     }
