@@ -13639,6 +13639,12 @@ public final class Settings {
                 "power_button_very_long_press";
 
         /**
+         * @hide
+         */
+        public static final String SHOW_FPS_OVERLAY = "show_fps_overlay";
+        
+
+        /**
          * Show overlay of CPU core speeds
          * @hide
          */

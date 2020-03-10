@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2017 The Android Open Source Project
  *
@@ -37,6 +38,7 @@ import com.android.systemui.qs.tiles.ColorInversionTile;
 import com.android.systemui.qs.tiles.DataSaverTile;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.FlashlightTile;
+import com.android.systemui.qs.tiles.FPSInfoTile;
 import com.android.systemui.qs.tiles.HotspotTile;
 import com.android.systemui.qs.tiles.LocationTile;
 import com.android.systemui.qs.tiles.NfcTile;
@@ -86,6 +88,7 @@ public class QSFactoryImpl implements QSFactory {
     private final Provider<AlwaysOnDisplayTile> mAlwaysOnDisplayTileProvider;
     private final Provider<OnTheGoTile> mOnTheGoTileProvider;
     private final Provider<CPUInfoTile> mCPUInfoTileProvider;
+    private final Provider<FPSInfoTile> mFPSInfoTileProvider;
 
     private final Lazy<QSHost> mQsHostLazy;
 
@@ -114,7 +117,9 @@ public class QSFactoryImpl implements QSFactory {
             Provider<SyncTile> syncTileProvider,
             Provider<AlwaysOnDisplayTile> alwaysOnDisplayTileProvider,
             Provider<CPUInfoTile> cpuInfoTileProvider,
-            Provider<OnTheGoTile> onTheGoTileProvider) {
+            Provider<OnTheGoTile> onTheGoTileProvider,
+            Provider<FPSInfoTile> fpsInfoTileProvider) {
+            
         mQsHostLazy = qsHostLazy;
         mWifiTileProvider = wifiTileProvider;
         mBluetoothTileProvider = bluetoothTileProvider;
@@ -140,7 +145,9 @@ public class QSFactoryImpl implements QSFactory {
         mAlwaysOnDisplayTileProvider = alwaysOnDisplayTileProvider;
         mCPUInfoTileProvider = cpuInfoTileProvider;
         mOnTheGoTileProvider = onTheGoTileProvider;
+        mFPSInfoTileProvider = fpsInfoTileProvider;
     }
+
 
     public QSTile createTile(String tileSpec) {
         QSTileImpl tile = createTileInternal(tileSpec);
@@ -199,6 +206,8 @@ public class QSFactoryImpl implements QSFactory {
                 return mCPUInfoTileProvider.get();
             case "onthego":
                 return mOnTheGoTileProvider.get();
+            case "fpsinfo":
+                return mFPSInfoTileProvider.get();
         }
 
         // Custom tiles
