@@ -114,7 +114,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,always_on_display,cpuinfo,location,hotspot,inversion,saver,sync,dark,work,cast,nfc,night,onthego,screenrecord,reverse
+        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,always_on_display,cpuinfo,location,hotspot,inversion,saver,sync,dark,work,cast,nfc,night,onthego,screenrecord,reverse,fpsinfo
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -583,4 +583,8 @@
     <integer name="controls_max_columns_adjust_below_width_dp">320</integer>
     <!-- If the config font scale is >= this value, potentially adjust the number of columns-->
     <item name="controls_max_columns_adjust_above_font_scale" translatable="false" format="float" type="dimen">1.25</item>
+
+    <!-- FPSInfoService FPS node file path -->
+    <string name="config_fpsInfoSysNode" translatable="false"></string>
+
 </resources>
