@@ -157,6 +157,7 @@ public final class ClockManager {
         addBuiltinClock(() -> new LineageClockController(res, layoutInflater, colorExtractor));
         addBuiltinClock(() -> new SamsungClockController(res, layoutInflater, colorExtractor));
         addBuiltinClock(() -> new SamsungBoldClockController(res, layoutInflater, colorExtractor));
+        addBuiltinClock(() -> new OronosClockController(res, layoutInflater, colorExtractor));        
         addBuiltinClock(() -> new TypeClockController(res, layoutInflater, colorExtractor));
         addBuiltinClock(() -> new TypeClockAltController(res, layoutInflater, colorExtractor));
         addBuiltinClock(() -> new DividedLinesClockController(res, layoutInflater, colorExtractor));
