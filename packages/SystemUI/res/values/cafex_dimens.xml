@@ -66,4 +66,7 @@
     <dimen name="status_bar_mobile_type_padding">2dp</dimen>
     <dimen name="status_bar_mobile_type_padding_limit">10dp</dimen>
 
+    <!-- App Lock -->
+    <dimen name="applock_icon_dimension">54dp</dimen>
+    
 </resources>
