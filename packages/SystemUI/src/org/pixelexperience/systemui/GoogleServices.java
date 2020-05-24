@@ -75,9 +75,9 @@ public class GoogleServices extends VendorServices {
 
     @Override
     public void start() {
-        AmbientIndicationContainer ambientIndicationContainer = mStatusBar.getNotificationShadeWindowView().findViewById(R.id.ambient_indication_container);
-        ambientIndicationContainer.initializeView(mStatusBar, mFeatureFlags);
-        addService(new AmbientIndicationService(mContext, ambientIndicationContainer, mKeyguardIndicationController, mAlarmManager));
+        //AmbientIndicationContainer ambientIndicationContainer = mStatusBar.getNotificationShadeWindowView().findViewById(R.id.ambient_indication_container);
+       // ambientIndicationContainer.initializeView(mStatusBar, mFeatureFlags);
+       // addService(new AmbientIndicationService(mContext, ambientIndicationContainer, mKeyguardIndicationController, mAlarmManager));
         addService(new DisplayCutoutEmulationAdapter(mContext));
         addService(new CoversheetService(mContext));
         mAutorotateDataService.init();
