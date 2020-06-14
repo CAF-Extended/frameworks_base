@@ -54,6 +54,8 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import com.android.internal.statusbar.IStatusBarService;
+import android.util.TypedValue;
+
 import com.android.internal.R;
 
 import java.util.Arrays;
@@ -301,5 +303,11 @@ public class Utils {
         Canvas canvas = new Canvas(dest);
         canvas.drawBitmap(source, null, targetRect, null);
         return dest;
+    }
+    
+    public static int getThemeAccentColor (final Context context) {
+        final TypedValue value = new TypedValue ();
+        context.getTheme ().resolveAttribute (android.R.attr.colorAccent, value, true);
+        return value.data;
     }
 }
