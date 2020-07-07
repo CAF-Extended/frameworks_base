@@ -23,13 +23,19 @@ import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedul
 
 import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.UserManager;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.util.TypedValue;
@@ -107,6 +113,9 @@ public class KeyguardStatusBarView extends RelativeLayout implements
 
     private SystemStatusAnimationScheduler mAnimationScheduler;
     private FeatureFlags mFeatureFlags;
+    private boolean mImmerseMode;
+    private Handler mHandler = new Handler();
+    private CustomSettingsObserver mCustomSettingsObserver = new CustomSettingsObserver(mHandler);
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
@@ -145,6 +154,8 @@ public class KeyguardStatusBarView extends RelativeLayout implements
         mBatteryController = Dependency.get(BatteryController.class);
         mAnimationScheduler = Dependency.get(SystemStatusAnimationScheduler.class);
         mFeatureFlags = Dependency.get(FeatureFlags.class);
+        updateCutout();
+        mCustomSettingsObserver.observe();
     }
 
     @Override
@@ -167,15 +178,20 @@ public class KeyguardStatusBarView extends RelativeLayout implements
                 getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.text_size_small_material));
 
-        updateKeyguardStatusBarHeight();
+        updateCutout();
     }
 
     private void updateKeyguardStatusBarHeight() {
         final int waterfallTop =
                 mDisplayCutout == null ? 0 : mDisplayCutout.getWaterfallInsets().top;
         MarginLayoutParams lp =  (MarginLayoutParams) getLayoutParams();
-        lp.height =  getResources().getDimensionPixelSize(
-                R.dimen.status_bar_header_height_keyguard) + waterfallTop;
+        if (mImmerseMode) {
+            lp.height =  getResources().getDimensionPixelSize(
+                    R.dimen.status_bar_height);
+        } else {
+            lp.height =  getResources().getDimensionPixelSize(
+                    R.dimen.status_bar_header_height_keyguard) + waterfallTop;
+        }
         setLayoutParams(lp);
     }
 
@@ -569,5 +585,35 @@ public class KeyguardStatusBarView extends RelativeLayout implements
     private void updateClipping() {
         mClipRect.set(0, mTopClipping, getWidth(), getHeight());
         setClipBounds(mClipRect);
+    }
+    
+    private class CustomSettingsObserver extends ContentObserver {
+        CustomSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.DISPLAY_CUTOUT_MODE), false, this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (uri.equals(Settings.System.getUriFor(Settings.System.DISPLAY_CUTOUT_MODE))) {
+                updateCutout();
+            }
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            updateCutout();
+        }
+    }
+
+    private void updateCutout() {
+        mImmerseMode = Settings.System.getIntForUser(mContext.getContentResolver(),
+                        Settings.System.DISPLAY_CUTOUT_MODE, 0, UserHandle.USER_CURRENT) == 1;
+        updateKeyguardStatusBarHeight();
     }
 }

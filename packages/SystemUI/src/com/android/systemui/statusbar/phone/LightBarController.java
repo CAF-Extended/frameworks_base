@@ -22,14 +22,22 @@ import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
+import android.content.res.Configuration;
 import android.content.Context;
+import android.content.ContentResolver;
+import android.database.ContentObserver;
 import android.graphics.Color;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.view.InsetsFlags;
 import android.view.ViewDebug;
 import android.view.WindowInsetsController.Appearance;
 
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.view.AppearanceRegion;
+import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
@@ -37,6 +45,8 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -47,7 +57,8 @@ import javax.inject.Inject;
  * Controls how light status bar flag applies to the icons.
  */
 @SysUISingleton
-public class LightBarController implements BatteryController.BatteryStateChangeCallback, Dumpable {
+public class LightBarController implements BatteryController.BatteryStateChangeCallback, Dumpable,
+       ConfigurationListener {
 
     private static final float NAV_BAR_INVERSION_SCRIM_ALPHA_THRESHOLD = 0.1f;
 
@@ -62,6 +73,10 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private int mNavigationBarMode;
     private int mNavigationMode;
     private final Color mDarkModeColor;
+    private boolean mForceDarkIcons = false;
+    private Handler mHandler = new Handler();
+    private CustomSettingsObserver mCustomSettingsObserver = new CustomSettingsObserver(mHandler);
+    private Context mContext;
 
     /**
      * Whether the navigation bar should be light factoring in already how much alpha the scrim has
@@ -95,6 +110,10 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         mNavigationMode = navModeController.addListener((mode) -> {
             mNavigationMode = mode;
         });
+        mContext = ctx;
+        mCustomSettingsObserver.observe();
+        updateCutout(null);
+        Dependency.get(ConfigurationController.class).addCallback(this);
     }
 
     public void setNavigationBar(LightBarTransitionsController navigationBar) {
@@ -206,6 +225,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
     private void updateStatus() {
         final int numStacks = mAppearanceRegions.length;
         int numLightStacks = 0;
+        boolean iconsDark = !mForceDarkIcons;
 
         // We can only have maximum one light stack.
         int indexLightStack = -1;
@@ -221,7 +241,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         // If all stacks are light, all icons get dark.
         if (numLightStacks == numStacks) {
             mStatusBarIconController.setIconsDarkArea(null);
-            mStatusBarIconController.getTransitionsController().setIconsDark(true, animateChange());
+            mStatusBarIconController.getTransitionsController().setIconsDark(iconsDark, animateChange());
 
         }
 
@@ -235,7 +255,7 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
         else {
             mStatusBarIconController.setIconsDarkArea(
                     mAppearanceRegions[indexLightStack].getBounds());
-            mStatusBarIconController.getTransitionsController().setIconsDark(true, animateChange());
+            mStatusBarIconController.getTransitionsController().setIconsDark(iconsDark, animateChange());
         }
     }
 
@@ -289,6 +309,53 @@ public class LightBarController implements BatteryController.BatteryStateChangeC
             pw.println(" NavigationBarTransitionsController:");
             mNavigationBarController.dump(fd, pw, args);
             pw.println();
+        }
+    }
+
+    private class CustomSettingsObserver extends ContentObserver {
+        CustomSettingsObserver(Handler handler) {
+            super(handler);
+        }
+
+        void observe() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.DISPLAY_CUTOUT_MODE), false, this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (uri.equals(Settings.System.getUriFor(Settings.System.DISPLAY_CUTOUT_MODE))) {
+                updateCutout(null);
+            }
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            updateCutout(null);
+        }
+    }
+
+    @Override
+    public void onConfigChanged(Configuration newConfig) {
+        updateCutout(newConfig);
+    }
+
+    @Override
+    public void onDensityOrFontScaleChanged() {}
+
+    @Override
+    public void onOverlayChanged() {}
+
+    @Override
+    public void onLocaleListChanged() {}
+
+    private void updateCutout(Configuration newConfig) {
+        if (newConfig == null || newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mForceDarkIcons = Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.DISPLAY_CUTOUT_MODE, 0, UserHandle.USER_CURRENT) == 1;
+        } else {
+            mForceDarkIcons = false;
         }
     }
 }
