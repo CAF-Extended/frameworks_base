@@ -38,6 +38,8 @@ import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.accessibility.AccessibilityButtonModeObserver;
 import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
+import com.android.systemui.CustomSettingsService;
+import com.android.systemui.ScreenDecorations;
 import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -364,6 +366,7 @@ public class Dependency {
     @Inject Lazy<UiEventLogger> mUiEventLogger;
     @Inject Lazy<FeatureFlags> mFeatureFlagsLazy;
     @Inject Lazy<StatusBarContentInsetsProvider> mContentInsetsProviderLazy;
+    @Inject Lazy<ScreenDecorations> mScreenDecorations;
 
     @Inject
     public Dependency() {
@@ -588,6 +591,7 @@ public class Dependency {
     @VisibleForTesting
     public static void setInstance(Dependency dependency) {
         sDependency = dependency;
+        mProviders.put(ScreenDecorations.class, mScreenDecorations::get);
     }
 
     protected final <T> T getDependency(Class<T> cls) {
