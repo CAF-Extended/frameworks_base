@@ -33,18 +33,8 @@
     <integer name="config_proximityCheckTimeout">250</integer>
     <bool name="config_proximityCheckOnWakeEnabledByDefault">false</bool>
 
-    <!-- Global Actions prefs list -->
-    <string-array translatable="false" name="custom_config_globalActionsList">
-        <item>emergency</item>
-        <item>power</item>
-        <item>restart</item>
-        <item>advanced</item>
-        <item>logout</item>
-        <item>users</item>
-        <item>silent</item>
-        <item>screenshot</item>
-        <item>airplane</item>
-        <item>settings</item>
-        <item>lockdown</item>
+    <!-- The list of vendor package signatures that should also be considered
+         platform signatures, specifically for use on devices with a vendor partition. -->
+    <string-array name="config_vendorPlatformSignatures">
     </string-array>
 </resources>
