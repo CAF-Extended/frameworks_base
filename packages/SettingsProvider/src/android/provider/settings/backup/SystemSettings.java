@@ -99,5 +99,6 @@ public class SystemSettings {
         Settings.System.FLASHLIGHT_ON_CALL_RATE,
         Settings.System.DOUBLE_TAP_SLEEP_GESTURE,
         Settings.System.DOUBLE_TAP_SLEEP_LOCKSCREEN,
+        Settings.System.NOTIFICATION_HEADERS,
     };
 }
