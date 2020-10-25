@@ -231,4 +231,7 @@ oneway interface IStatusBar
     void suppressAmbientDisplay(boolean suppress);
 
     void toggleCameraFlash();
+
+    void screenPinningStateChanged(boolean enabled);
+    void leftInLandscapeChanged(boolean isLeft);
 }
