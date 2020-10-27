@@ -469,15 +469,14 @@ final class ActivityManagerConstants extends ContentObserver {
     private void updatePerfConfigConstants() {
         if (mPerf != null) {
           // Maximum number of cached processes we will allow.
-            DEFAULT_MAX_CACHED_PROCESSES = MAX_CACHED_PROCESSES = CUR_MAX_CACHED_PROCESSES = Integer.valueOf(
-                                                 mPerf.perfGetProp("ro.vendor.qti.sys.fw.bg_apps_limit", "32"));
+            DEFAULT_MAX_CACHED_PROCESSES = MAX_CACHED_PROCESSES = CUR_MAX_CACHED_PROCESSES = SystemProperties.getInt("persist.vendor.qti.sys.fw.bg_apps_limit", 32);
 
             //Trim Settings
-            USE_TRIM_SETTINGS = Boolean.parseBoolean(mPerf.perfGetProp("ro.vendor.qti.sys.fw.use_trim_settings", "true"));
-            EMPTY_APP_PERCENT = Integer.valueOf(mPerf.perfGetProp("ro.vendor.qti.sys.fw.empty_app_percent", "50"));
-            TRIM_EMPTY_PERCENT = Integer.valueOf(mPerf.perfGetProp("ro.vendor.qti.sys.fw.trim_empty_percent", "100"));
-            TRIM_CACHE_PERCENT = Integer.valueOf(mPerf.perfGetProp("ro.vendor.qti.sys.fw.trim_cache_percent", "100"));
-            TRIM_ENABLE_MEMORY = Long.valueOf(mPerf.perfGetProp("ro.vendor.qti.sys.fw.trim_enable_memory", "1073741824"));
+            USE_TRIM_SETTINGS = SystemProperties.getBoolean("persist.vendor.qti.sys.fw.use_trim_settings", true);
+            EMPTY_APP_PERCENT = SystemProperties.getInt("persist.vendor.qti.sys.fw.empty_app_percent", 50);
+            TRIM_EMPTY_PERCENT = SystemProperties.getInt("persist.vendor.qti.sys.fw.trim_empty_percent", 100);
+            TRIM_CACHE_PERCENT = SystemProperties.getInt("persist.vendor.qti.sys.fw.trim_cache_percent", 100);
+            TRIM_ENABLE_MEMORY = SystemProperties.getLong("persist.vendor.qti.sys.fw.trim_enable_memory", 1073741824 );
 
             // The maximum number of empty app processes we will let sit around.
             CUR_MAX_EMPTY_PROCESSES = computeEmptyProcessLimit(CUR_MAX_CACHED_PROCESSES);

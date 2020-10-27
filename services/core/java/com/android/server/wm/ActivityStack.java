@@ -133,6 +133,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -223,6 +224,7 @@ public class ActivityStack extends Task {
     }
 
     public BoostFramework mPerf = null;
+    private static boolean ANIMATION_BOOST = SystemProperties.getBoolean("persist.vendor.perf.animation.boost", true);    
 
     // The topmost Activity passed to convertToTranslucent(). When non-null it means we are
     // waiting for all Activities in mUndrawnActivitiesBelowTopTranslucent to be removed as they
@@ -1796,7 +1798,7 @@ public class ActivityStack extends Task {
                     mWmService.prepareAppTransition(prev.getTask() == next.getTask()
                             ? TRANSIT_ACTIVITY_CLOSE
                             : TRANSIT_TASK_CLOSE, false);
-                    if(prev.getTask() != next.getTask() && mPerf != null) {
+                    if(prev.getTask() != next.getTask() && mPerf != null && ANIMATION_BOOST) {
                        mPerf.perfHint(BoostFramework.VENDOR_HINT_ANIM_BOOST, next.packageName);
                     }
                     dc.prepareAppTransition(
@@ -1816,7 +1818,7 @@ public class ActivityStack extends Task {
                             : next.mLaunchTaskBehind
                                     ? TRANSIT_TASK_OPEN_BEHIND
                                     : TRANSIT_TASK_OPEN, false);
-                    if(prev.getTask() != next.getTask() && mPerf != null) {
+                    if(prev.getTask() != next.getTask() && mPerf != null && ANIMATION_BOOST) {
                        mPerf.perfHint(BoostFramework.VENDOR_HINT_ANIM_BOOST, next.packageName);
                     }
                     dc.prepareAppTransition(

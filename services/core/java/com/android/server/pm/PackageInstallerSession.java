@@ -254,7 +254,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private BoostFramework mPerfBoostInstall = null;
     private boolean mIsPerfLockAcquired = false;
     private final int MAX_INSTALL_DURATION = 20000;
-
+    private  static boolean INSTALL_BOOST = SystemProperties.getBoolean("persist.vendor.perf.install.boost", true);
+    
     final int sessionId;
     final int userId;
     final SessionParams params;
@@ -941,7 +942,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (mPerfBoostInstall == null){
                 mPerfBoostInstall = new BoostFramework();
             }
-            if (mPerfBoostInstall != null && !mIsPerfLockAcquired) {
+            if (mPerfBoostInstall != null && !mIsPerfLockAcquired && INSTALL_BOOST) {
                 mPerfBoostInstall.perfHint(BoostFramework.VENDOR_HINT_PACKAGE_INSTALL_BOOST,
                         null, MAX_INSTALL_DURATION, -1);
                 mIsPerfLockAcquired = true;

@@ -230,6 +230,8 @@ public final class OomAdjuster {
     public static int mPerfHandle = -1;
     public static int mCurRenderThreadTid = -1;
     public static boolean mIsTopAppRenderThreadBoostEnabled = false;
+    private static  boolean TOP_APP_RENDER = SystemProperties.getBoolean("persist.vendor.perf.topAppRenderThreadBoost.enable", true);
+    private static boolean BGT_ENABLE = SystemProperties.getBoolean("persist.vendor.perf.bgt.enable", false);
 
     private final int mNumSlots;
     private ArrayList<ProcessRecord> mTmpProcessList = new ArrayList<ProcessRecord>();
@@ -254,6 +256,18 @@ public final class OomAdjuster {
         return adjusterThread;
     }
 
+    private void updatePerfConfigs() {
+        if(mPerf != null) {
+            mMinBServiceAgingTime = SystemProperties.getInt("persist.vendor.qti.sys.fw.bservice_age", 5000);
+            mBServiceAppThreshold = SystemProperties.getInt("persist.vendor.qti.sys.fw.bservice_limit", 5);
+            mEnableBServicePropagation = SystemProperties.getBoolean("persist.vendor.qti.sys.fw.bservice_enable", false);
+            mEnableProcessGroupCgroupFollow = SystemProperties.getBoolean("persist.vendor.qti.cgroup_follow.enable", false);
+            mProcessGroupCgroupFollowDex2oatOnly = SystemProperties.getBoolean("persist.vendor.qti.cgroup_follow.dex2oat_only", false);
+            mIsTopAppRenderThreadBoostEnabled = SystemProperties.getBoolean("persist.vendor.perf.topAppRenderThreadBoost.enable", false);
+            mEnableBgt = SystemProperties.getBoolean("persist.vendor.perf.bgt.enable",false);
+        }
+     }           
+
     OomAdjuster(ActivityManagerService service, ProcessList processList, ActiveUids activeUids,
             ServiceThread adjusterThread) {
         mService = service;
@@ -263,16 +277,6 @@ public final class OomAdjuster {
         mLocalPowerManager = LocalServices.getService(PowerManagerInternal.class);
         mConstants = mService.mConstants;
         mCachedAppOptimizer = new CachedAppOptimizer(mService);
-
-        if(mPerf != null) {
-            mMinBServiceAgingTime = Integer.valueOf(mPerf.perfGetProp("ro.vendor.qti.sys.fw.bservice_age", "5000"));
-            mBServiceAppThreshold = Integer.valueOf(mPerf.perfGetProp("ro.vendor.qti.sys.fw.bservice_limit", "5"));
-            mEnableBServicePropagation = Boolean.parseBoolean(mPerf.perfGetProp("ro.vendor.qti.sys.fw.bservice_enable", "false"));
-            mEnableProcessGroupCgroupFollow = Boolean.parseBoolean(mPerf.perfGetProp("ro.vendor.qti.cgroup_follow.enable", "false"));
-            mProcessGroupCgroupFollowDex2oatOnly = Boolean.parseBoolean(mPerf.perfGetProp("ro.vendor.qti.cgroup_follow.dex2oat_only", "false"));
-            mIsTopAppRenderThreadBoostEnabled = Boolean.parseBoolean(mPerf.perfGetProp("vendor.perf.topAppRenderThreadBoost.enable", "false"));
-            mEnableBgt = Boolean.parseBoolean(mPerf.perfGetProp("vendor.perf.bgt.enable","false"));
-        }
 
         mProcessGroupHandler = new Handler(adjusterThread.getLooper(), msg -> {
             final int pid = msg.arg1;
@@ -303,6 +307,7 @@ public final class OomAdjuster {
                 / ProcessList.CACHED_APP_IMPORTANCE_LEVELS;
         IBinder b = ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
         mPlatformCompat = IPlatformCompat.Stub.asInterface(b);
+        updatePerfConfigs();        
     }
 
     void initSettings() {
@@ -850,6 +855,7 @@ public final class OomAdjuster {
             final long oldTime, final ActiveUids activeUids) {
         ArrayList<ProcessRecord> lruList = mProcessList.mLruProcesses;
         final int numLru = lruList.size();
+        final ProcessRecord TOP_APP = mService.getTopAppLocked();
 
         final int emptyProcessLimit = mConstants.CUR_MAX_EMPTY_PROCESSES;
         final int cachedProcessLimit = mConstants.CUR_MAX_CACHED_PROCESSES
@@ -900,6 +906,19 @@ public final class OomAdjuster {
                     applyOomAdjLocked(app, true, now, nowElapsed);
                 }
 
+                int baikalAdj = 0;
+                if( app.isPersistent() ) {
+                    baikalAdj = 0;
+                } else {
+                    baikalAdj = BaikalActivityServiceStatic.applyOomAdjLocked(mService,app,TOP_APP);
+                    if( baikalAdj == 2 ) {
+                        app.kill("by baikalos service",ApplicationExitInfo.REASON_OTHER,
+                           ApplicationExitInfo.SUBREASON_ISOLATED_NOT_NEEDED, true);
+                        continue;
+                    } 
+                }
+
+                if( baikalAdj == 0 ) {
                 // Count the number of process types.
                 switch (app.getCurProcState()) {
                     case PROCESS_STATE_CACHED_ACTIVITY:
@@ -950,6 +969,7 @@ public final class OomAdjuster {
                         mNumNonCachedProcs++;
                         break;
                 }
+                }
 
                 if (app.isolated && app.numberOfRunningServices() <= 0
                         && app.isolatedEntryPoint == null) {
@@ -960,7 +980,7 @@ public final class OomAdjuster {
                     // definition not re-use the same process again, and it is
                     // good to avoid having whatever code was running in them
                     // left sitting around after no longer needed.
-                    app.kill("isolated not needed", ApplicationExitInfo.REASON_OTHER,
+                    if( baikalAdj == 0 ) app.kill("isolated not needed", ApplicationExitInfo.REASON_OTHER,
                             ApplicationExitInfo.SUBREASON_ISOLATED_NOT_NEEDED, true);
                 } else {
                     // Keeping this process, update its uid.
@@ -1318,7 +1338,7 @@ public final class OomAdjuster {
             app.adjType = "top-activity";
             foregroundActivities = true;
             procState = PROCESS_STATE_CUR_TOP;
-            if(mIsTopAppRenderThreadBoostEnabled) {
+            if(mIsTopAppRenderThreadBoostEnabled && TOP_APP_RENDER) {
                 if(mCurRenderThreadTid != app.renderThreadTid && app.renderThreadTid > 0) {
                     mCurRenderThreadTid = app.renderThreadTid;
                     if (mPerfBoost != null) {
@@ -2006,6 +2026,9 @@ public final class OomAdjuster {
                         clientProcState = PROCESS_STATE_BOUND_TOP;
                     } else {
                         clientProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+                        adj = clientAdj > ProcessList.FOREGROUND_APP_ADJ
+                                ? clientAdj : ProcessList.FOREGROUND_APP_ADJ;
+                        app.setCurRawAdj(adj);
                     }
                 }
 
@@ -2037,7 +2060,7 @@ public final class OomAdjuster {
             // FOREGROUND_APP_ADJ.
             if (cpr.hasExternalProcessHandles()) {
                 if (adj > ProcessList.FOREGROUND_APP_ADJ) {
-                    adj = ProcessList.FOREGROUND_APP_ADJ;
+                    adj = ProcessList.FOREGROUND_APP_ADJ+50;
                     app.setCurRawAdj(adj);
                     schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
                     app.setCached(false);
@@ -2287,7 +2310,7 @@ public final class OomAdjuster {
 
         if (app.curAdj != app.setAdj) {
             // Hooks for background apps transition
-            if (mEnableBgt) {
+            if (mEnableBgt && BGT_ENABLE) {
                 if ((app.setAdj >= ProcessList.CACHED_APP_MIN_ADJ &&
                         app.setAdj <= ProcessList.CACHED_APP_MAX_ADJ) &&
                         app.curAdj == ProcessList.FOREGROUND_APP_ADJ &&
