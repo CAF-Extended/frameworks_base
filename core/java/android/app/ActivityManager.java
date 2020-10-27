@@ -74,6 +74,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.text.TextUtils;
+import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
@@ -92,6 +93,7 @@ import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 
+import com.android.internal.baikalos.BaikalSettings;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -146,6 +148,7 @@ public class ActivityManager {
 
     @UnsupportedAppUsage
     private final Context mContext;
+    private static Context mStaticContext;
 
     private static volatile boolean sSystemReady = false;
 
@@ -847,6 +850,7 @@ public class ActivityManager {
     @UnsupportedAppUsage
     /*package*/ ActivityManager(Context context, Handler handler) {
         mContext = context;
+        mStaticContext = context;
     }
 
     /**
@@ -1068,7 +1072,7 @@ public class ActivityManager {
      * @hide
      */
     public static boolean isSmallBatteryDevice() {
-        return RoSystemProperties.CONFIG_SMALL_BATTERY;
+        return RoSystemProperties.CONFIG_SMALL_BATTERY || BaikalSettings.getExtremeIdleEnabled();
     }
 
     /**

@@ -280,7 +280,7 @@ class ProcessRecord implements WindowProcessListener {
      * For managing the LRU list.
      */
     @CompositeRWLock({"mService", "mProcLock"})
-    private long mLastActivityTime;
+    long mLastActivityTime;
 
     /**
      * Set to true when process was launched with a wrapper attached.
