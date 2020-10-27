@@ -115,6 +115,8 @@ import com.android.server.wm.ActivityRecord;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.ActivityStack;
 
+import com.android.internal.baikalos.BaikalSettings;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -523,9 +525,10 @@ public final class ActiveServices {
     }
 
     private boolean appRestrictedAnyInBackground(final int uid, final String packageName) {
-        final int mode = mAm.getAppOpsManager().checkOpNoThrow(
-                AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, uid, packageName);
-        return (mode != AppOpsManager.MODE_ALLOWED);
+        //final int mode = mAm.mAppOpsService.checkOperation(
+        //         AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, uid, packageName);
+        //return (mode != AppOpsManager.MODE_ALLOWED);
+        return mAm.isBackgroundRestrictedNoCheck(uid,packageName);
     }
 
     ComponentName startServiceLocked(IApplicationThread caller, Intent service, String resolvedType,
@@ -617,13 +620,45 @@ public final class ActiveServices {
             }
         }
 
+
+        if( mAm.getAppStartModeLocked(r.appInfo.uid, r.packageName,
+                    r.appInfo.targetSdkVersion, callingPid, false, true, true) == ActivityManager.APP_START_MODE_DISABLED ) {
+            Slog.w(TAG, "Background start disabled: service "
+                    + service + " to " + r.shortInstanceName
+                    + " from pid=" + callingPid + " uid=" + callingUid
+                    + " pkg=" + callingPackage);
+                r.stopIfKilled = true;
+                return null;
+        }
+
+
+
         // If this isn't a direct-to-foreground start, check our ability to kick off an
         // arbitrary service
-        if (forcedStandby || (!r.startRequested && !fgRequired)) {
+        if ( /*(mAm.mOnBattery) && */(forcedStandby || 
+                ((!r.startRequested || BaikalSettings.getExtremeIdleEnabled() || BaikalSettings.getStaminaMode() ) && !fgRequired))
+                ) {
             // Before going further -- if this app is not allowed to start services in the
             // background, then at this point we aren't going to let it period.
-            final int allowed = mAm.getAppStartModeLocked(r.appInfo.uid, r.packageName,
+
+            int allowed = ActivityManager.APP_START_MODE_NORMAL;
+
+
+            if( BaikalActivityServiceStatic.isServiceWhitelisted(mAm, r, callingUid, callingPid, callingPackage, true) ) {
+                allowed = ActivityManager.APP_START_MODE_NORMAL;
+            } else if( BaikalActivityServiceStatic.isServiceBlacklisted(mAm, r, callingUid, callingPid, callingPackage, true) ) {
+                forcedStandby = true;
+                if( r.appInfo.targetSdkVersion >= Build.VERSION_CODES.O ) {
+                    allowed = ActivityManager.APP_START_MODE_DELAYED_RIGID;
+                } else {
+                    allowed = ActivityManager.APP_START_MODE_DELAYED;
+                    forceSilentAbort = true;
+                }
+            } else {
+                allowed = mAm.getAppStartModeLocked(r.appInfo.uid, r.packageName,
                     r.appInfo.targetSdkVersion, callingPid, false, false, forcedStandby);
+            }
+
             if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
                 Slog.w(TAG, "Background start not allowed: service "
                         + service + " to " + r.shortInstanceName
@@ -632,6 +667,7 @@ public final class ActiveServices {
                 if (allowed == ActivityManager.APP_START_MODE_DELAYED || forceSilentAbort) {
                     // In this case we are silently disabling the app, to disrupt as
                     // little as possible existing apps.
+                    r.stopIfKilled = true;
                     return null;
                 }
                 if (forcedStandby) {
@@ -642,14 +678,29 @@ public final class ActiveServices {
                         if (DEBUG_BACKGROUND_CHECK) {
                             Slog.v(TAG, "Silently dropping foreground service launch due to FAS");
                         }
+                        r.stopIfKilled = true;
                         return null;
                     }
                 }
                 // This app knows it is in the new model where this operation is not
                 // allowed, so tell it what has happened.
+                r.stopIfKilled = true;
                 UidRecord uidRec = mAm.mProcessList.getUidRecordLocked(r.appInfo.uid);
                 return new ComponentName("?", "app is in background uid " + uidRec);
+            } else {
+                Slog.w(TAG, "Background start allowed: service "
+                        + service + " to " + r.shortInstanceName
+                        + " from pid=" + callingPid + " uid=" + callingUid
+                        + " pkg=" + callingPackage + " startFg?=" + fgRequired);
             }
+        } else {
+            Slog.w(TAG, "Background start allowed: service "
+                    + service + " to " + r.shortInstanceName
+                    + " from pid=" + callingPid + " uid=" + callingUid
+                    + " pkg=" + callingPackage
+                    + " forcedStandby=" + forcedStandby
+                    + " r.startRequested=" + r.startRequested
+                    + " startFg=" + fgRequired);
         }
 
         // At this point we've applied allowed-to-start policy based on whether this was
@@ -675,6 +726,7 @@ public final class ActiveServices {
         // XXX This is not dealing with fgRequired!
         if (!requestStartTargetPermissionsReviewIfNeededLocked(r, callingPackage, callingFeatureId,
                 callingUid, service, callerFg, userId)) {
+            if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "requestStartTargetPermissionsReviewIfNeededLocked: " + r);
             return null;
         }
 
@@ -2786,6 +2838,14 @@ public final class ActiveServices {
             return false;
         }
 
+        if( r.stopIfKilled ) {
+            Slog.w(TAG, "Not scheduling restart of crashed service " + r.shortInstanceName
+                    + " - stopIfKilled");
+            return false;
+        }
+
+        if( BaikalSettings.getStaminaMode() ) return false;
+
         ServiceMap smap = getServiceMapLocked(r.userId);
         if (smap.mServicesByInstanceName.get(r.instanceName) != r) {
             ServiceRecord cur = smap.mServicesByInstanceName.get(r.instanceName);
@@ -3085,8 +3145,9 @@ public final class ActiveServices {
 
         if (!isolated) {
             app = mAm.getProcessRecordLocked(procName, r.appInfo.uid, false);
-            if (DEBUG_MU) Slog.v(TAG_MU, "bringUpServiceLocked: appInfo.uid=" + r.appInfo.uid
-                        + " app=" + app);
+            if (DEBUG_MU) Slog.v(TAG_MU, "bringUpServiceLocked: appInfo.uid=" + r.appInfo.uid 
+                        + " procName=" + procName
+                        + " r=" + r, new Throwable());
             if (app != null && app.thread != null) {
                 try {
                     app.addPackage(r.appInfo.packageName, r.appInfo.longVersionCode, mAm.mProcessStats);
@@ -3097,7 +3158,9 @@ public final class ActiveServices {
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Exception when starting service " + r.shortInstanceName, e);
                 }
-
+                if( app == null ) {
+                    r.stopIfKilled = true;
+                }
                 // If a dead object exception was thrown -- fall through to
                 // restart the application.
             }
@@ -3130,7 +3193,8 @@ public final class ActiveServices {
                         + r.appInfo.packageName + "/"
                         + r.appInfo.uid + " for service "
                         + r.intent.getIntent() + ": process is bad";
-                Slog.w(TAG, msg);
+                Slog.w(TAG, msg, new Throwable());
+                r.stopIfKilled = true;
                 bringDownServiceLocked(r);
                 return msg;
             }
@@ -3430,7 +3494,7 @@ public final class ActiveServices {
         bringDownServiceLocked(r);
     }
 
-    private final void bringDownServiceLocked(ServiceRecord r) {
+    final void bringDownServiceLocked(ServiceRecord r) {
         //Slog.i(TAG, "Bring down service:");
         //r.dump("  ");
         ServiceData sData = new ServiceData();
@@ -3529,7 +3593,7 @@ public final class ActiveServices {
             }
         }
 
-        if (DEBUG_SERVICE) {
+        if (false & DEBUG_SERVICE) {
             RuntimeException here = new RuntimeException();
             here.fillInStackTrace();
             Slog.v(TAG_SERVICE, "Bringing down " + r + " " + r.intent, here);

@@ -55,7 +55,7 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import android.util.BoostFramework;
-
+import android.os.SystemProperties;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -126,7 +126,7 @@ public abstract class PanelViewController {
      * For PanelView fling perflock call
      */
     private BoostFramework mPerf = null;
-
+    private static boolean USE_SCROLL_BOOST = SystemProperties.getBoolean("persist.vendor.perf.gestureflingboost.enable", true);
     /**
      * Whether an instant expand request is currently pending and we are just waiting for layout.
      */
@@ -617,7 +617,7 @@ public abstract class PanelViewController {
                 animator.setDuration(mFixedDuration);
             }
         }
-        if (mPerf != null) {
+        if (mPerf != null && USE_SCROLL_BOOST) {
             String currentPackage = mView.getContext().getPackageName();
             mPerf.perfHint(BoostFramework.VENDOR_HINT_SCROLL_BOOST, currentPackage, -1, BoostFramework.Scroll.PANEL_VIEW);
         }

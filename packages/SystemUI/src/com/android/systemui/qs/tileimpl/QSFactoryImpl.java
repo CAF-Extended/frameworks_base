@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2017 The Android Open Source Project
  *
@@ -72,6 +71,9 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import dagger.Lazy;
+import com.android.systemui.qs.tiles.AggressiveIdleTile;
+import com.android.systemui.qs.tiles.ExtremeIdleTile;
+import com.android.systemui.qs.tiles.StaminaModeTile;
 
 @Singleton
 public class QSFactoryImpl implements QSFactory {
@@ -291,6 +293,10 @@ public class QSFactoryImpl implements QSFactory {
                 return mGamingModeTileProvider.get();
             case "theme":
                 return mThemeTileProvider.get();
+            case "aggressive_idle":
+                return new AggressiveIdleTile(mQsHostLazy.get());
+            case "extreme_idle":
+                return new ExtremeIdleTile(mQsHostLazy.get());
         }
 
         // Custom tiles

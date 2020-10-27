@@ -38,6 +38,8 @@ import android.util.AttributeSet;
 import android.view.Display;
 import android.view.View;
 import android.widget.TextView;
+import android.provider.Settings;
+
 
 import com.android.settingslib.Utils;
 import com.android.systemui.DemoMode;
@@ -259,6 +261,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
         updateClockVisibility();
         updateShowSeconds();
         updateClockVisibility();
+        onDensityOrFontScaleChanged();
     }
 
     @Override
@@ -443,7 +446,20 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
 
     @Override
     public void onDensityOrFontScaleChanged() {
-        FontSizeUtils.updateFontSize(this, R.dimen.status_bar_clock_size);
+
+        final boolean dlsbEnabled = Settings.Global.getInt(getContext().getContentResolver(),
+                Settings.Global.BAIKALOS_DLSB_ENABLED, 0) != 0;
+        if( dlsbEnabled ) {
+            FontSizeUtils.updateFontSize(this, R.dimen.status_bar_clock_size_dlsb);
+        setPaddingRelative(
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.status_bar_clock_starting_padding_dlsb),
+                0,
+                mContext.getResources().getDimensionPixelSize(
+                        R.dimen.status_bar_clock_end_padding),
+                0);
+        } else {
+            FontSizeUtils.updateFontSize(this, R.dimen.status_bar_clock_size);
         setPaddingRelative(
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.status_bar_clock_starting_padding),
@@ -451,6 +467,8 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.status_bar_clock_end_padding),
                 0);
+        }
+        
     }
 
     /**

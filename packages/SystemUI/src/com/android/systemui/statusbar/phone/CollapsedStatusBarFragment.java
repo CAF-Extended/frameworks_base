@@ -27,6 +27,7 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.provider.Settings;
 import android.view.ViewStub;
 import android.widget.LinearLayout;
 
@@ -77,7 +78,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private boolean mIsClockBlacklisted;
 
     private SignalCallback mSignalCallback = new SignalCallback() {
-        @Override
+         @Override
         public void setIsAirplaneMode(NetworkController.IconState icon) {
             mCommandQueue.recomputeDisableFlags(getContext().getDisplayId(), true /* animate */);
         }
@@ -106,7 +107,17 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
+//        boolean dlsbEnabled = Settings.System.getInt(getContext().getContentResolver(),
+ //                   Settings.System.BAIKALOS_DLSB_ENABLED, 1) == 1;
+
+        final boolean dlsbEnabled = Settings.Global.getInt(getContext().getContentResolver(),
+                Settings.Global.BAIKALOS_DLSB_ENABLED, 0) != 0;
+
+        if( dlsbEnabled )  {
+            return inflater.inflate(R.layout.dlsb_status_bar, container, false);
+            } else {
         return inflater.inflate(R.layout.status_bar, container, false);
+      }
     }
 
     @Override

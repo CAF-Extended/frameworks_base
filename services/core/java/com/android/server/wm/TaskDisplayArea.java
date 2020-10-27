@@ -54,6 +54,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.os.UserHandle;
+import android.os.SystemProperties;
 import android.util.BoostFramework;
 import android.util.IntArray;
 import android.util.Slog;
@@ -157,6 +158,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     public static int mPerfHandle = -1;
     public BoostFramework mPerfBoost = null;
     public BoostFramework mUxPerf = null;
+    private static boolean LAUNCH_BOOST = SystemProperties.getBoolean("persist.vendor.perf.launch.boost", true);
 
     TaskDisplayArea(DisplayContent displayContent, WindowManagerService service, String name,
             int displayAreaFeature) {
@@ -1219,7 +1221,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
        if (mPerfBoost == null) {
            mPerfBoost = new BoostFramework();
        }
-       if (mPerfBoost != null) {
+       if (mPerfBoost != null && LAUNCH_BOOST) {
            mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, r.packageName, -1, BoostFramework.Launch.BOOST_V1);
            mPerfSendTapHint = true;
            mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, r.packageName, -1, BoostFramework.Launch.BOOST_V2);
