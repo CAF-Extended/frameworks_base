@@ -93,6 +93,7 @@ import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALLOWLISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
@@ -295,6 +296,7 @@ import android.server.ServerProtoEnums;
 import android.sysprop.InitProperties;
 import android.sysprop.VoldProperties;
 import android.telephony.TelephonyManager;
+import android.telecom.DefaultDialerManager;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.style.SuggestionSpan;
@@ -403,6 +405,17 @@ import com.android.server.wm.WindowManagerService;
 import com.android.server.wm.WindowProcessController;
 import com.android.server.ActivityTriggerService;
 
+import com.android.internal.baikalos.Actions;
+import com.android.internal.baikalos.AppProfile;
+import com.android.internal.baikalos.AppProfileSettings;
+import com.android.internal.baikalos.BaikalSettings;
+
+import dalvik.system.VMRuntime;
+
+import com.android.internal.baikalos.AppProfile;
+import com.android.internal.baikalos.BaikalSettings;
+//import com.android.internal.baikalos.Runtime;
+
 import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
@@ -433,6 +446,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.android.internal.baikalos.Actions;
 
 public class ActivityManagerService extends IActivityManager.Stub
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback, ActivityManagerGlobalLock {
@@ -1536,6 +1550,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final SwipeToScreenshotObserver mSwipeToScreenshotObserver;
     private boolean mIsSwipeToScrenshotEnabled;
+    BaikalActivityService mBaikalActivityService;
+
 
     /**
      * Used to notify activity lifecycle events.
@@ -2375,6 +2391,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingStartActivityUids = new PendingStartActivityUids(mContext);
         mTraceErrorLogger = new TraceErrorLogger();
         mSwipeToScreenshotObserver = new SwipeToScreenshotObserver(mHandler, mContext);
+        mBaikalActivityService = new BaikalActivityService(mHandler,mContext);
+
     }
 
     public void setSystemServiceManager(SystemServiceManager mgr) {
@@ -5567,6 +5585,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     int appRestrictedInBackgroundLOSP(int uid, String packageName, int packageTargetSdk) {
         // Apps that target O+ are always subject to background check
         if (packageTargetSdk >= Build.VERSION_CODES.O) {
+            if(UserHandle.isCore(uid) || isOnDeviceIdleWhitelistLocked(uid, false)) {
+                if (DEBUG_BACKGROUND_CHECK) {
+                    Slog.i(TAG, "App " + uid + "/" + packageName + " targets O+, whitelisted");
+                }
+                return ActivityManager.APP_START_MODE_NORMAL;
+            }
+
             if (DEBUG_BACKGROUND_CHECK) {
                 Slog.i(TAG, "App " + uid + "/" + packageName + " targets O+, restricted");
             }
@@ -5650,11 +5675,46 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (mInternal.isPendingTopUid(uid)) {
             return ActivityManager.APP_START_MODE_NORMAL;
         }
+
+        String retString = "UNKNOWN";
+
+        int ret = BaikalActivityServiceStatic.getAppStartModeLocked(uid,packageName, packageTargetSdk, callingPid, alwaysRestrict, disabledOnly, forcedStandby);
+        if( ret == -1 ) {
+            ret = getAppStartModeLockedInternal(uid,packageName, packageTargetSdk, callingPid, alwaysRestrict, disabledOnly, forcedStandby);
+        }
+        switch(ret) {
+            case ActivityManager.APP_START_MODE_NORMAL:
+                retString = "APP_START_MODE_NORMAL";
+                break;
+            case ActivityManager.APP_START_MODE_DELAYED:
+                retString = "APP_START_MODE_DELAYED";
+                break;
+            case ActivityManager.APP_START_MODE_DELAYED_RIGID:
+                retString = "APP_START_MODE_DELAYED_RIGID";
+                break;
+            case ActivityManager.APP_START_MODE_DISABLED:
+                retString = "APP_START_MODE_DISABLED";
+                break;
+        }
+
+        if( !disabledOnly ) { 
+            Slog.d("BaikalActivityServiceStatic", 
+                "checkAllowBackground: uid=" + uid + 
+                " pkg=" + packageName + 
+                " always=" + alwaysRestrict + 
+                " force=" + forcedStandby + 
+                " ret=" + retString);
+        }
+        return ret;
+    }
+
+    int getAppStartModeLockedInternal(int uid, String packageName, int packageTargetSdk,
+            int callingPid, boolean alwaysRestrict, boolean disabledOnly, boolean forcedStandby) {
         UidRecord uidRec = mProcessList.getUidRecordLOSP(uid);
         if (DEBUG_BACKGROUND_CHECK) Slog.d(TAG, "checkAllowBackground: uid=" + uid + " pkg="
                 + packageName + " rec=" + uidRec + " always=" + alwaysRestrict + " idle="
                 + (uidRec != null ? uidRec.isIdle() : false));
-        if (uidRec == null || alwaysRestrict || forcedStandby || uidRec.isIdle()) {
+        if (uidRec == null || alwaysRestrict || forcedStandby || uidRec.isIdle() || BaikalSettings.getExtremeIdleActive()) {
             boolean ephemeral;
             if (uidRec == null) {
                 ephemeral = getPackageManagerInternal().isPackageEphemeral(
@@ -5684,10 +5744,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             + " onallowlist=" + isOnDeviceIdleAllowlistLOSP(uid, false)
                             + " onallowlist(ei)=" + isOnDeviceIdleAllowlistLOSP(uid, true));
                 }
-                if (startMode == ActivityManager.APP_START_MODE_DELAYED) {
-                    // This is an old app that has been forced into a "compatible as possible"
-                    // mode of background check.  To increase compatibility, we will allow other
-                    // foreground apps to cause its services to start.
+                if (startMode == ActivityManager.APP_START_MODE_DELAYED ) {
                     if (callingPid >= 0) {
                         ProcessRecord proc;
                         synchronized (mPidsSelfLocked) {
@@ -5697,12 +5754,39 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 proc.mState.getCurProcState())) {
                             // Whoever is instigating this is in the foreground, so we will allow it
                             // to go through.
+                                proc.getCurProcState() == ActivityManager.PROCESS_STATE_TOP ) {                            
                             return ActivityManager.APP_START_MODE_NORMAL;
                         }
                     }
                 }
+
+                if (startMode == ActivityManager.APP_START_MODE_DELAYED_RIGID 
+                     && uidRec != null
+                     && !uidRec.idle 
+                     && !alwaysRestrict
+                     && !forcedStandby
+                     && BaikalSettings.getExtremeIdleActive() ) {
+                    if (callingPid >= 0) {
+                        ProcessRecord proc;
+                        synchronized (mPidsSelfLocked) {
+                            proc = mPidsSelfLocked.get(callingPid);
+                        }
+                        if (proc != null &&
+                                proc.getCurProcState() <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE ) {
+                            return ActivityManager.APP_START_MODE_NORMAL;
+                        }
+                    }
+                }
+
                 return startMode;
+
             }
+        }
+        if (DEBUG_BACKGROUND_CHECK) {
+            Slog.d(TAG, "checkAllowBackground: allow uid=" + uid
+                + " pkg=" + packageName + " startMode=" + ActivityManager.APP_START_MODE_NORMAL
+                + " onwhitelist=" + isOnDeviceIdleWhitelistLocked(uid, false)
+                + " onwhitelist(ei)=" + isOnDeviceIdleWhitelistLocked(uid, true));
         }
         return ActivityManager.APP_START_MODE_NORMAL;
     }
@@ -6243,8 +6327,23 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     boolean isBackgroundRestrictedNoCheck(final int uid, final String packageName) {
-        final int mode = getAppOpsManager().checkOpNoThrow(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND,
+
+        if( uid > 10000 && 
+             (BaikalSettings.getStaminaMode()/* ||
+             (com.android.internal.baikalos.Runtime.isIdleMode() 
+              && BaikalSettings.getExtremeIdleEnabled())*/ ) ) { 
+            if( isOnDeviceIdleWhitelistLocked(uid,true) ) return false;
+            if( DefaultDialerManager.isDefaultOrSystemDialer(mContext,packageName) ) return false;
+            Slog.i("BaikalActivityServiceStatic", "isBackgroundRestrictedNoCheck: restricted(1) uid=" + uid + " pkg=" + packageName);
+            return true;
+        }
+
+        final int mode = mAppOpsService.checkOperation(AppOpsManager.OP_RUN_ANY_IN_BACKGROUND,
                 uid, packageName);
+
+        if( mode != AppOpsManager.MODE_ALLOWED ) {
+            Slog.i("BaikalActivityServiceStatic", "isBackgroundRestrictedNoCheck: restricted(2) uid=" + uid + " pkg=" + packageName);
+        }
         return mode != AppOpsManager.MODE_ALLOWED;
     }
 
@@ -6321,6 +6420,26 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.setPersistent(true);
             app.mState.setMaxAdj(ProcessList.PERSISTENT_PROC_ADJ);
         }
+
+	    //final int appId = UserHandle.getAppId(app.uid);
+
+        if( mBaikalActivityService != null &&  mBaikalActivityService.mAppSettings != null ) {
+            AppProfile profile = mBaikalActivityService.mAppSettings.getProfile(app.uid,info.packageName);
+            if( profile != null && profile.mPinned ) {
+                app.maxAdj = ProcessList.PERSISTENT_PROC_ADJ;
+                Slog.d(TAG, "baikal: setPersistent1("+ info.packageName + ")");
+            }
+        }
+
+
+	/*
+        if( Arrays.binarySearch(mDeviceIdleWhitelist, app.uid) >= 0 ) {
+            app.setPersistent(true);
+            app.maxAdj = ProcessList.PERSISTENT_PROC_ADJ;
+            Slog.d(TAG, "baikal: setPersistent("+ info.packageName + ")");
+	    }
+	*/
+
         if (app.getThread() == null && mPersistentStartingProcesses.indexOf(app) < 0) {
             mPersistentStartingProcesses.add(app);
             mProcessList.startProcessLocked(app, new HostingRecord("added application",
@@ -7609,6 +7728,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUserController.onSystemReady();
             mAppOpsService.systemReady();
             mProcessList.onSystemReady();
+            mBaikalActivityService.setSystemReady(true);
             mSystemReady = true;
             t.traceEnd();
         }
@@ -14618,6 +14738,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_TOP_START,
                                 mCurResumedPackage, mCurResumedUid);
                     }
+            		Actions.sendTopAppChanged(mCurResumedUid,mCurResumedPackage);                    
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }

@@ -103,6 +103,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -206,6 +207,7 @@ class ActivityStarter {
     private IVoiceInteractor mVoiceInteractor;
 
     public BoostFramework mPerf = null;
+    private static boolean LAUNCH_BOOST = SystemProperties.getBoolean("persist.vendor.perf.launch.boost", true);    
 
     // Last activity record we attempted to start
     private ActivityRecord mLastStartActivityRecord;
@@ -1737,11 +1739,15 @@ class ActivityStarter {
             final Task taskToAffiliate = (mLaunchTaskBehind && mSourceRecord != null)
                     ? mSourceRecord.getTask() : null;
             String packageName= mService.mContext.getPackageName();
+<<<<<<< HEAD
             if (mPerf != null) {
                 if (mStartActivity.perfActivityBoostHandler > 0) {
                    Slog.i(TAG, "Activity boosted, release it firstly");
                    mPerf.perfLockReleaseHandler(mStartActivity.perfActivityBoostHandler);
                 }
+=======
+            if (mPerf != null && LAUNCH_BOOST) {
+>>>>>>> b0c3b8faa40a... Bringup BaikalOS internals,App profiles and Powesave Settings
                 mStartActivity.perfActivityBoostHandler =
                     mPerf.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
                                         packageName, -1, BoostFramework.Launch.BOOST_V1);
@@ -2716,11 +2722,15 @@ class ActivityStarter {
 
     private void addOrReparentStartingActivity(Task parent, String reason) {
         String packageName= mService.mContext.getPackageName();
+<<<<<<< HEAD
         if (mPerf != null) {
             if (mStartActivity.perfActivityBoostHandler > 0) {
                 Slog.i(TAG, "Activity boosted, release it firstly");
                 mPerf.perfLockReleaseHandler(mStartActivity.perfActivityBoostHandler);
             }
+=======
+        if (mPerf != null && LAUNCH_BOOST) {
+>>>>>>> b0c3b8faa40a... Bringup BaikalOS internals,App profiles and Powesave Settings
             mStartActivity.perfActivityBoostHandler =
                 mPerf.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
                                     packageName, -1, BoostFramework.Launch.BOOST_V1);

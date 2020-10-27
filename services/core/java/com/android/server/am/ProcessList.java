@@ -139,6 +139,11 @@ import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowManagerService;
 import com.android.server.wm.WindowProcessController;
 
+
+import com.android.internal.baikalos.AppProfile;
+import com.android.internal.baikalos.Runtime;
+import com.android.internal.baikalos.BaikalSettings;
+
 import dalvik.system.VMRuntime;
 
 import java.io.DataInputStream;
@@ -2569,6 +2574,30 @@ public final class ProcessList {
             app.addPackage(info.packageName, info.longVersionCode, mService.mProcessStats);
             checkSlow(startTime, "startProcess: added package to existing proc");
         }
+
+        if ((info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
+            app.setPersistent(true);
+            app.maxAdj = ProcessList.PERSISTENT_PROC_ADJ;
+        }
+
+	    //final int appId = UserHandle.getAppId(app.uid);
+
+        if( mService.mBaikalActivityService != null &&  mService.mBaikalActivityService.mAppSettings != null ) {
+            AppProfile profile = mService.mBaikalActivityService.mAppSettings.getProfile(app.uid,info.packageName);
+            if( profile != null && profile.mPinned ) {
+                app.maxAdj = ProcessList.PERSISTENT_PROC_ADJ;
+                Slog.d(TAG, "baikal: setPersistent4("+ info.packageName + ")");
+            }
+        }
+
+	/*
+
+        if( Arrays.binarySearch(mService.mDeviceIdleWhitelist, app.uid) >= 0 ) {
+            app.setPersistent(true);
+            app.maxAdj = ProcessList.PERSISTENT_PROC_ADJ;
+            Slog.d(TAG, "baikal: setPersistent4("+ info.packageName + ")");
+	    }
+	*/
 
         // If the system is not ready yet, then hold off on starting this
         // process until it is.

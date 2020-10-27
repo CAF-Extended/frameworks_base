@@ -162,6 +162,9 @@ import java.util.TreeSet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 
+import com.android.internal.baikalos.Actions;
+import com.android.internal.baikalos.BaikalSettings;
+
 /**
  * Alarm manager implementation.
  *
@@ -2055,6 +2058,7 @@ public class AlarmManagerService extends SystemService {
         final int callerProcState = mActivityManagerInternal.getUidProcessState(callingUid);
         removeLocked(operation, directReceiver, REMOVE_REASON_UNDEFINED);
         incrementAlarmCount(a.uid);
+  	    BaikalStaticService.processAlarmLocked(a,mPendingIdleUntil);        
         setImplLocked(a);
         MetricsHelper.pushAlarmScheduled(a, callerProcState);
     }
@@ -3954,6 +3958,7 @@ public class AlarmManagerService extends SystemService {
     }
 
     long currentNonWakeupFuzzLocked(long nowELAPSED) {
+        if (BaikalSettings.getAggressiveIdleEnabled() ) return 3*60*60*1000;    
         long timeSinceOn = nowELAPSED - mNonInteractiveStartTime;
         if (timeSinceOn < 5 * 60 * 1000) {
             // If the screen has been off for 5 minutes, only delay by at most two minutes.
