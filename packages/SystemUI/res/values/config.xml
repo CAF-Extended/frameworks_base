@@ -677,4 +677,26 @@
 
     <!-- If not zero, limits the internal screen recorder's framerate to the set value. -->
     <integer name="config_screenRecorderMaxFramerate">0</integer>
+
+    <!-- The SYS temperature sensor path, defaults to empty -->
+    <string name="config_sysTempSensor" translatable="false"></string>
+    <!-- The BAT temperature sensor path, defaults to empty -->
+    <string name="config_batTempSensor" translatable="false"></string>
+
+    <!-- The CPU temperature sensor path, defaults to empty -->
+    <string name="config_cpuTempSensor" translatable="false"></string>
+
+    <!-- The CPU temperature divider, if needed -->
+    <integer name="config_cpuTempDivider" translatable="false">1</integer>
+
+    <!-- The CPU temperature sensor path, defaults to empty -->
+    <string name="config_batCurrent" translatable="false"></string>
+
+    <!-- The CPU temperature sensor path, defaults to empty -->
+    <string name="config_cpuTempSensorPrefix" translatable="false"></string>
+    <!-- The CPU temperature sensor path, defaults to empty -->
+    <string name="config_cpuTempSensorSuffix" translatable="false"></string>
+    <!-- The CPU temperature sensor path, defaults to empty -->
+    <string name="config_cpuTempSensorNumber" translatable="false"></string>
+
 </resources>

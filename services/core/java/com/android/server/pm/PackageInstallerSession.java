@@ -284,7 +284,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private BoostFramework mPerfBoostInstall = null;
     private boolean mIsPerfLockAcquired = false;
     private final int MAX_INSTALL_DURATION = 20000;
-
+    
     final int sessionId;
     final int userId;
     final SessionParams params;
