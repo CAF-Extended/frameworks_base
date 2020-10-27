@@ -27,6 +27,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.Signature;
+import android.os.SystemProperties;
 import android.os.Build;
 import android.os.Trace;
 import android.util.ArrayMap;
@@ -70,6 +71,7 @@ public class ApkSignatureVerifier {
             Runtime.getRuntime().availableProcessors() >= 4 ? 4 : Runtime.getRuntime().availableProcessors() ;
     private static BoostFramework sPerfBoost = null;
     private static boolean sIsPerfLockAcquired = false;
+    private static boolean INSTALL_BOOST = SystemProperties.getBoolean("persist.vendor.perf.install.boost", true);    
     /**
      * Verifies the provided APK and returns the certificates associated with each signer.
      *
@@ -343,7 +345,7 @@ public class ApkSignatureVerifier {
             if (sPerfBoost == null) {
                 sPerfBoost = new BoostFramework();
             }
-            if (sPerfBoost != null && !sIsPerfLockAcquired && verifyFull) {
+            if (sPerfBoost != null && !sIsPerfLockAcquired && verifyFull && INSTALL_BOOST ) {
                 //Use big enough number here to hold the perflock for entire PackageInstall session
                 sPerfBoost.perfHint(BoostFramework.VENDOR_HINT_PACKAGE_INSTALL_BOOST,
                         null, Integer.MAX_VALUE, -1);

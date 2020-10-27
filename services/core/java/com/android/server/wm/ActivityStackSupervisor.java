@@ -122,6 +122,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
@@ -186,6 +187,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
     public static int mPerfHandle = -1;
     public BoostFramework mPerfBoost = new BoostFramework();
     public BoostFramework mUxPerf = new BoostFramework();
+    private static boolean LAUNCH_BOOST = SystemProperties.getBoolean("persist.vendor.perf.launch.boost", true);    
 
     /** How long we wait until giving up on the activity telling us it released the top state. */
     private static final int TOP_RESUMED_STATE_LOSS_TIMEOUT = 500;
@@ -1024,7 +1026,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         boolean knownToBeDead = false;
         if (wpc != null && wpc.hasThread()) {
             try {
-                if (mPerfBoost != null) {
+                if (mPerfBoost != null && LAUNCH_BOOST) {
                     Slog.i(TAG, "The Process " + r.processName + " Already Exists in BG. So sending its PID: " + wpc.getPid());
                     mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, r.processName, wpc.getPid(), BoostFramework.Launch.TYPE_START_APP_FROM_BG);
                 }
@@ -1820,7 +1822,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
     void acquireAppLaunchPerfLock(ActivityRecord r) {
         /* Acquire perf lock during new app launch */
-        if (mPerfBoost != null) {
+        if (mPerfBoost != null && LAUNCH_BOOST) {
             mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, r.packageName, -1, BoostFramework.Launch.BOOST_V1);
             mPerfSendTapHint = true;
             mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, r.packageName, -1, BoostFramework.Launch.BOOST_V2);
