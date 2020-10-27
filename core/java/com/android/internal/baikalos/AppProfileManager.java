@@ -26,7 +26,6 @@ import android.os.SystemProperties;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.util.BoostFramework;
-
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
@@ -42,6 +41,9 @@ import android.telephony.PreciseDataConnectionState;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.VoLteServiceState;
 
+import android.os.Parcel;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 
 public class AppProfileManager extends MessageHandler { 
 
@@ -51,10 +53,10 @@ public class AppProfileManager extends MessageHandler {
 
     private AppProfileSettings mAppSettings;
 
-    private boolean mOnCharger;
+    private boolean mOnCharger=false;
     private boolean mDeviceIdleMode = false;
     private boolean mScreenMode = true;
-    private int mTopUid;
+    private int mTopUid=-1;
     private String mTopPackageName;
     private boolean mReaderMode;
 
@@ -68,17 +70,28 @@ public class AppProfileManager extends MessageHandler {
     private String mIdlePerfProfile = "idle";
     private String mIdleThermProfile = "idle";
 
-    private int mActiveFrameRate=0;
+    private static Object mCurrentProfileSync = new Object();
+    private static AppProfile mCurrentProfile = null;
+
+    private int mActiveFrameRate=-2;
+
+    private boolean mReaderModeAvailable = false;
+    private boolean mVariableFps = false;
 
     TelephonyManager mTelephonyManager;
+
+    static AppProfile getCurrentProfile() {
+        synchronized(mCurrentProfileSync) {
+            return mCurrentProfile;
+        }
+    }
 
     @Override
     protected void initialize() {
         if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG,"initialize()");                
         synchronized(mLock) {
 
-            mAppSettings = new AppProfileSettings(getHandler(), getContext(), getContext().getContentResolver(), null);
-
+            mAppSettings = AppProfileSettings.getInstance(getHandler(), getContext(), getContext().getContentResolver(), null);
             IntentFilter topAppFilter = new IntentFilter();
             topAppFilter.addAction(Actions.ACTION_TOP_APP_CHANGED);
             getContext().registerReceiver(mTopAppReceiver, topAppFilter);
@@ -101,6 +114,8 @@ public class AppProfileManager extends MessageHandler {
 
             mTelephonyManager = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
             mTelephonyManager.listen(mPhoneStateListener, 0xFFFFFFF);
+            mReaderModeAvailable  = SystemProperties.get("sys.baikal.reader", "1").equals("1");
+            mVariableFps = SystemProperties.get("sys.baikal.var_fps", "0").equals("1");
         }
     }
 
@@ -126,8 +141,9 @@ public class AppProfileManager extends MessageHandler {
 
     protected void setActiveFrameRateLocked(int fps) {
         if( mActiveFrameRate != fps ) {
-            mActiveFrameRate = fps;
-            setHwFrameRateLocked(fps, false);
+            if( setHwFrameRateLocked(fps, false) ) {
+                mActiveFrameRate = fps;
+            }
         }
     }
 
@@ -151,13 +167,8 @@ public class AppProfileManager extends MessageHandler {
                          callState.getBackgroundCallState() > 0;
 
         if( state ) {
-            //if( getIdlePerformanceMode() ) {
-            //    setIdlePerformanceMode(false);
-            //}
-            setHwPerfProfileLocked("boost",true);
-        } else {
-            restoreProfileForCurrentMode();
-        }
+            BaikalUtils.boost();
+        } 
     }
 
 
@@ -197,18 +208,24 @@ public class AppProfileManager extends MessageHandler {
         if( uid != mTopUid || packageName != mTopPackageName ) {
             mTopUid = uid;
             mTopPackageName = packageName;
+            mReaderModeAvailable  = SystemProperties.get("sys.baikal.reader", "1").equals("1");
+
             BaikalSettings.setTopApp(mTopUid, mTopPackageName);
 
             AppProfile profile = mAppSettings.getProfile(uid,packageName);
+            synchronized(mCurrentProfileSync) {
+                mCurrentProfile = profile;
+            }
             if( profile == null || uid < Process.FIRST_APPLICATION_UID ) {
+                setReaderModeLocked(false);
                 setActivePerfProfileLocked("default");
                 setActiveThermProfileLocked("default");
-                setReaderModeLocked(false);
+                setActiveFrameRateLocked(-1);
                 Actions.sendBrightnessOverrideChanged(setBrightnessOverrideLocked(0));
             } else {
                 setActivePerfProfileLocked(profile.mPerfProfile);
                 setActiveThermProfileLocked(profile.mThermalProfile);
-                setActiveFrameRateLocked(profile.mFrameRate);
+                setActiveFrameRateLocked(profile.mFrameRate-1);
                 setReaderModeLocked(profile.mReader);
                 Actions.sendBrightnessOverrideChanged(setBrightnessOverrideLocked(profile.mBrightness));
             }
@@ -222,9 +239,15 @@ public class AppProfileManager extends MessageHandler {
     }
 
     protected void setReaderModeLocked(boolean mode) {
-        if( mReaderMode != mode ) {
-            mReaderMode = mode;
-            Actions.sendReaderModeChanged(mode);
+        if( mReaderModeAvailable ) {
+            if( mReaderMode != mode ) {
+                mReaderMode = mode;
+                Actions.sendReaderModeChanged(mode);
+            }
+        } else {
+            if( mode ) {
+                Slog.w(TAG,"setReaderModeLocked. Reader Mode not available!");
+            }
         }
     }
    
@@ -235,7 +258,7 @@ public class AppProfileManager extends MessageHandler {
                 String action = intent.getAction();
                 String packageName = (String)intent.getExtra(Actions.EXTRA_PACKAGENAME);
                 int uid = (int)intent.getExtra(Actions.EXTRA_UID);
-                if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG,"topAppChanged uid=" + uid + ", packgeName=" + packageName);
+                if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG,"topAppChanged uid=" + uid + ", packageName=" + packageName);
                 setTopAppLocked(uid,packageName);
             }
         }
@@ -299,9 +322,21 @@ public class AppProfileManager extends MessageHandler {
         SystemPropertiesSet("baikal.therm.profile", profile);
     }
 
-    private void setHwFrameRateLocked(int fps, boolean override) {
-        if( mIdleProfileActive && !override ) return;
+    private boolean setHwFrameRateLocked(int fps, boolean override) {
+        if( !mVariableFps ) return true;
+        if( mIdleProfileActive && !override ) return false;
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken("android.ui.ISurfaceComposer");
+        if( fps == -1 ) fps = 3;
+        data.writeInt(fps);
+        try {
+            ServiceManager.getService("SurfaceFlinger").transact(1035, data, (Parcel) null, 0);
+        } catch (RemoteException e) {
+            return false;
+        }
+        data.recycle();
         SystemPropertiesSet("baikal.fps_override", Integer.toString(fps));
+        return true;
     }
 
     private void setIdlePerformanceMode(boolean idle) {
@@ -313,16 +348,13 @@ public class AppProfileManager extends MessageHandler {
             if( mScreenMode ) {
                 setHwPerfProfileLocked(mActivePerfProfile,true);
                 setHwThermProfileLocked(mActiveThermProfile,true);
-                //setHwFrameRateLocked(mActiveFrameRate,true);
             } else {
                 setHwPerfProfileLocked(mScreenOffPerfProfile,true);
                 setHwThermProfileLocked(mScreenOffThermProfile,true);
-                //setHwFrameRateLocked(30,true);
             }
         } else {
             setHwPerfProfileLocked(mIdlePerfProfile,true);
             setHwThermProfileLocked(mIdleThermProfile,true);
-            //setHwFrameRateLocked(30,true);
         }
     }
 

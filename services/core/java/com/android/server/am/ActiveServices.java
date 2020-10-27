@@ -172,6 +172,8 @@ import com.android.server.wm.ActivityServiceConnectionsHolder;
 
 import com.android.internal.baikalos.BaikalSettings;
 
+import com.android.internal.baikalos.BaikalSettings;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -780,6 +782,15 @@ public final class ActiveServices {
 
             int allowed = ActivityManager.APP_START_MODE_NORMAL;
 
+            if( BaikalSettings.getAppRestricted(callingUid, callingPackage) ) {
+
+                Slog.w(TAG, "Background start restricted: service "
+                        + service + " to " + r.shortInstanceName
+                        + " from pid=" + callingPid + " uid=" + callingUid
+                        + " pkg=" + callingPackage + " startFg?=" + fgRequired);
+                r.stopIfKilled = true;
+                return null;
+            }
 
             if( BaikalActivityServiceStatic.isServiceWhitelisted(mAm, r, callingUid, callingPid, callingPackage, true) ) {
                 allowed = ActivityManager.APP_START_MODE_NORMAL;
@@ -838,7 +849,8 @@ public final class ActiveServices {
                     + " forcedStandby=" + forcedStandby
                     + " r.startRequested=" + r.startRequested
                     + " startFg=" + fgRequired);
-        }
+         }
+	    }        
 
         // At this point we've applied allowed-to-start policy based on whether this was
         // an ordinary startService() or a startForegroundService().  Now, only require that
@@ -3608,14 +3620,11 @@ public final class ActiveServices {
                     + " - system is shutting down");
             return false;
         }
-
         if( r.stopIfKilled ) {
             Slog.w(TAG, "Not scheduling restart of crashed service " + r.shortInstanceName
                     + " - stopIfKilled");
             return false;
         }
-
-        if( BaikalSettings.getStaminaMode() ) return false;
 
         ServiceMap smap = getServiceMapLocked(r.userId);
         if (smap.mServicesByInstanceName.get(r.instanceName) != r) {
@@ -3928,6 +3937,22 @@ public final class ActiveServices {
             boolean whileRestarting, boolean permissionsReviewRequired, boolean packageFrozen,
             boolean enqueueOomAdj)
             throws TransactionTooLargeException {
+
+        //if( r.appInfo.packageName.startsWith("com.google.android.gms") ) {
+        //     Slog.w(TAG, "startProcessLocked(11): Bringup Service ():  check gms uid=" + r.appInfo.uid + " topUid=" + BaikalSettings.getTopAppUid() + " blocked = " + BaikalSettings.getAppBlocked(r.appInfo.uid, r.appInfo.packageName) );
+        //}
+
+        //if( r.appInfo.uid != BaikalSettings.getTopAppUid() ) {
+            if( BaikalSettings.getAppBlocked(r.appInfo.uid, r.appInfo.packageName) ) {
+                Slog.w(TAG, "startProcessLocked(11): Bringup Service ():  blocked " + r.appInfo);
+                return null;
+            }
+            if( BaikalSettings.getAppRestricted(r.appInfo.uid, r.appInfo.packageName) ) {
+                Slog.w(TAG, "startProcessLocked(11): Bringup Service ():  restricted " + r.appInfo);
+                return null;
+            }
+        //}
+
         if (r.app != null && r.app.getThread() != null) {
             sendServiceArgsLocked(r, execInFg, false);
             return null;

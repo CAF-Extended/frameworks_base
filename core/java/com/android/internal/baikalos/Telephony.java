@@ -132,7 +132,6 @@ public class Telephony extends MessageHandler {
             }); 
             mTorchThread.start();
         }*/
-
     }
 
     private BroadcastReceiver mRingerModeReceiver = new BroadcastReceiver() {

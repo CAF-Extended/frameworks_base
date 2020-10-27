@@ -31,6 +31,7 @@ import com.android.internal.baikalos.DevProfileManager;
 
 
 import com.android.internal.baikalos.BaikalSettings;
+import com.android.internal.baikalos.BaikalUtils;
 
 import android.util.Slog;
 
@@ -39,7 +40,6 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.BroadcastReceiver;
-
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -69,11 +69,9 @@ public class BaikalSystemService extends SystemService {
     private static final String TAG = "BaikalService";
 
     private static final boolean DEBUG = true;
-
     private boolean mSystemReady = false;
 
     private final Context mContext;
-
 
     final MyHandler mHandler;
     final MyHandlerThread mHandlerThread;
@@ -157,11 +155,9 @@ public class BaikalSystemService extends SystemService {
                 mBaikalDevProfileManager.initialize(mContext,mHandler);
 
                 mBaikalSettings = new BaikalSettings(mHandler,mContext);
-
-
                 IntentFilter topAppFilter = new IntentFilter();
                 topAppFilter.addAction(Actions.ACTION_TOP_APP_CHANGED);
-
+                getContext().registerReceiver(mTopAppReceiver, topAppFilter);
 	        }
 
 	        BaikalStaticService.Initialize(mContext,
@@ -180,13 +176,13 @@ public class BaikalSystemService extends SystemService {
                 int uid = getPackageUidLocked("com.google.android.gms");
 
                 Runtime.setGmsUid(uid);
-		        BaikalStaticService.setGmsUid(uid);
+    		        BaikalUtils.setGmsUid(uid);
 
                 uid = getPackageUidLocked("com.android.vending");
                 Runtime.setGpsUid(uid);
 
                 uid = getPackageUidLocked("com.dolby.daxservice");
-                BaikalStaticService.setDolbyUid(uid);
+                BaikalUtils.setDolbyUid(uid);
 
                 //mConstants.updateConstantsLocked();
 
@@ -262,5 +258,12 @@ public class BaikalSystemService extends SystemService {
         }
     }
 
+    private final BroadcastReceiver mTopAppReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            synchronized (BaikalSystemService.this) {
+            }
+        }
+    };
 
 }

@@ -75,6 +75,9 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 import dagger.Lazy;
+import com.android.systemui.qs.tiles.AggressiveIdleTile;
+import com.android.systemui.qs.tiles.ExtremeIdleTile;
+import com.android.systemui.qs.tiles.StaminaModeTile;
 
 @SysUISingleton
 public class QSFactoryImpl implements QSFactory {

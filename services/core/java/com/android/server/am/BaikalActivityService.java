@@ -92,7 +92,7 @@ public class BaikalActivityService implements com.android.internal.baikalos.AppP
                 Settings.Global.BAIKALOS_STAMINA_ENABLED, 0);
 
 	    mSystemReady = ready;
-        mAppSettings = new AppProfileSettings(mHandler, mContext, mContext.getContentResolver(), this);
+        mAppSettings = AppProfileSettings.getInstance(mHandler, mContext, mContext.getContentResolver(), this);
     }
 
     @Override

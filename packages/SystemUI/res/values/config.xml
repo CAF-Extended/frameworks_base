@@ -610,6 +610,7 @@
     <!-- content URL in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false -->
     <string translatable="false" name="config_batteryStateUnknownUrl"></string>
 
+<<<<<<< HEAD
     <!-- Whether wallet view is shown in landscape / seascape orientations -->
     <bool name="global_actions_show_landscape_wallet_view">false</bool>
     <!-- Whether global actions should show an informational message about changes in S -->
@@ -678,6 +679,11 @@
     <!-- If not zero, limits the internal screen recorder's framerate to the set value. -->
     <integer name="config_screenRecorderMaxFramerate">0</integer>
     
+=======
+    <!-- Whether to show VoLTE icon in the status bar -->
+    <bool name="config_display_volte">true</bool>
+
+>>>>>>> eb46ddf69e64... Bringup BaikalOS internals,App profiles and Powesave Settings
     <!-- The SYS temperature sensor path, defaults to empty -->
     <string name="config_sysTempSensor" translatable="false"></string>
     <!-- The BAT temperature sensor path, defaults to empty -->
@@ -698,4 +704,8 @@
     <string name="config_cpuTempSensorSuffix" translatable="false"></string>
     <!-- The CPU temperature sensor path, defaults to empty -->
     <string name="config_cpuTempSensorNumber" translatable="false"></string>
+<<<<<<< HEAD
+=======
+
+>>>>>>> eb46ddf69e64... Bringup BaikalOS internals,App profiles and Powesave Settings
 </resources>
