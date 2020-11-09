@@ -45,8 +45,5 @@
     <integer name="config_alertSliderLocation">0</integer>    
  
     <bool name="config_has_Soli">false</bool>
-
-    <!-- Default value for Ambiant Pulse light color -->
-    <integer name="config_ambientNotificationDefaultColor">0xFF3980FF</integer>  
                 
 </resources>
