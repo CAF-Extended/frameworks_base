@@ -18,5 +18,5 @@
 
     <!-- Qs visibility -->
     <dimen name="qs_tile_height_wo_label">64dp</dimen>
-
+        
 </resources>
