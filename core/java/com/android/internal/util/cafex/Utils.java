@@ -25,6 +25,9 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.RectF;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.input.InputManager;
 import android.hardware.Sensor;
@@ -39,6 +42,7 @@ import android.os.SystemProperties;
 import android.os.SystemClock;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -226,5 +230,67 @@ public class Utils {
                         InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
             }
         }, 20);
+    }
+
+    // Method to detect whether an overlay is enabled or not
+    public static boolean isThemeEnabled(String packageName) {
+        mOverlayService = new OverlayManager();
+        try {
+            List<OverlayInfo> infos = mOverlayService.getOverlayInfosForTarget("android",
+                    UserHandle.myUserId());
+            for (int i = 0, size = infos.size(); i < size; i++) {
+                if (infos.get(i).packageName.equals(packageName)) {
+                    return infos.get(i).isEnabled();
+                }
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static class OverlayManager {
+        private final IOverlayManager mService;
+
+        public OverlayManager() {
+            mService = IOverlayManager.Stub.asInterface(
+                    ServiceManager.getService(Context.OVERLAY_SERVICE));
+        }
+
+        public void setEnabled(String pkg, boolean enabled, int userId)
+                throws RemoteException {
+            mService.setEnabled(pkg, enabled, userId);
+        }
+
+        public List<OverlayInfo> getOverlayInfosForTarget(String target, int userId)
+                throws RemoteException {
+            return mService.getOverlayInfosForTarget(target, userId);
+        }
+    }
+
+    public static Bitmap scaleCenterInside(final Bitmap source, final int newWidth, final int newHeight) {
+        int sourceWidth = source.getWidth();
+        int sourceHeight = source.getHeight();
+
+        float widthRatio = (float) newWidth / sourceWidth;
+        float heightRatio = (float) newHeight / sourceHeight;
+        float ratio = Math.max(widthRatio, heightRatio);
+        float scaledWidth = sourceWidth * ratio;
+        float scaledHeight = sourceHeight * ratio;
+
+        //Bitmap scaled = Bitmap.createScaledBitmap(source, (int)scaledWidth, (int)scaledHeight, true);
+
+        RectF targetRect = null;
+        if (newWidth > newHeight) {
+            float inset = (scaledHeight - newHeight) / 2;
+            targetRect = new RectF(0, -inset, newWidth, newHeight + inset);
+        } else {
+            float inset = (scaledWidth - newWidth) / 2;
+            targetRect = new RectF(-inset, 0, newWidth + inset, newHeight);
+        }
+        Bitmap dest = Bitmap.createBitmap(newWidth, newHeight, source.getConfig());
+        Canvas canvas = new Canvas(dest);
+        canvas.drawBitmap(source, null, targetRect, null);
+        return dest;
     }
 }
