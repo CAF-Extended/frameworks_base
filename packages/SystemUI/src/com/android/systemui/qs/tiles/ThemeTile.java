@@ -35,8 +35,8 @@ import android.widget.ListView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.util.aosip.ThemesUtils;
-import com.android.internal.util.aosip.AOSiPUtils;
+import com.android.internal.util.cafex.ThemesUtils;
+import com.android.internal.util.cafex.Utils;
 
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.DetailAdapter;
@@ -50,6 +50,8 @@ import com.android.systemui.qs.tileimpl.QSTileImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Inject;
 
 public class ThemeTile extends QSTileImpl<BooleanState> {
 
@@ -125,6 +127,7 @@ public class ThemeTile extends QSTileImpl<BooleanState> {
     private Mode mMode;
     private static UiModeManager mUiModeManager;
 
+    @Inject
     public ThemeTile(QSHost host) {
         super(host);
         mOverlayManager = IOverlayManager.Stub.asInterface(
