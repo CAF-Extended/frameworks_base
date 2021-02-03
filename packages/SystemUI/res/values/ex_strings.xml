@@ -94,7 +94,8 @@
 
      <!-- Biometric Dialog - Use Face -->
     <string name="biometric_dialog_button_use_face">Use Face</string>
-
+    <!-- Scrolling Screenshot string -->
+    <string name="scrollss">Scroll</string>
     <!-- App Lock -->
     <string name="applock_locked">&#160;is locked</string>
     <string name="applock_fingerprint_face">, fingerprint or your face to unlock</string>
