@@ -92,4 +92,6 @@
     <string name="qs_data_switch_toast_0">Currently no SIM card is inserted</string>
     <string name="qs_data_switch_toast_1">Currently only one SIM card is inserted</string>    
 
+     <!-- Biometric Dialog - Use Face -->
+    <string name="biometric_dialog_button_use_face">Use Face</string>
 </resources>
