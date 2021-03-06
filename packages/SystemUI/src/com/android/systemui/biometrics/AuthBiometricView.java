@@ -648,6 +648,11 @@ public abstract class AuthBiometricView extends LinearLayout {
             mTryAgainButton.setVisibility(View.GONE);
             Utils.notifyAccessibilityContentChanged(mAccessibilityManager, this);
         });
+
+        mUseFaceButton.setOnClickListener((view) -> {
+            mCallback.onAction(Callback.ACTION_USE_FACE);
+        });
+
     }
 
     /**
