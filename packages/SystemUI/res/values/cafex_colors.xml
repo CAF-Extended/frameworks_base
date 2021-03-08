@@ -47,4 +47,7 @@
     <color name="quick_settings_theme_tile_teal">#FF009688</color>
     <color name="quick_settings_theme_tile_yellow">#FFFFEB3B</color>
 
+    <!-- QS Drag handle -->
+    <color name="qs_footer_drag_handle">#ffc8c8c8</color>
+    
 </resources>
