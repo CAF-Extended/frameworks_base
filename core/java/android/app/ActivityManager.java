@@ -93,6 +93,7 @@ import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 
+import com.android.internal.baikalos.BaikalSettings;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -1071,12 +1072,7 @@ public class ActivityManager {
      * @hide
      */
     public static boolean isSmallBatteryDevice() {
-	try {
-	    return Settings.Global.getInt(mStaticContext.getContentResolver(),
-                Settings.Global.BAIKALOS_EXTREME_IDLE, 0) == 1;
-	} catch(Exception e) {
-	}
-        return RoSystemProperties.CONFIG_SMALL_BATTERY;
+        return RoSystemProperties.CONFIG_SMALL_BATTERY || BaikalSettings.getExtremeIdleEnabled();
     }
 
     /**

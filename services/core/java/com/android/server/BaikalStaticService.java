@@ -25,6 +25,19 @@ import com.android.internal.baikalos.Sensors;
 import com.android.internal.baikalos.Runtime;
 import com.android.internal.baikalos.AppProfileManager;
 import com.android.internal.baikalos.DevProfileManager;
+<<<<<<< HEAD
+=======
+
+import android.app.job.IJobScheduler;
+import android.app.job.JobInfo;
+import android.app.job.JobParameters;
+import android.app.job.JobProtoEnums;
+import android.app.job.JobScheduler;
+import android.app.job.JobService;
+import android.app.job.JobSnapshot;
+import android.app.job.JobWorkItem;
+
+>>>>>>> 4a301ebf0083... Squashed commit
 import com.android.internal.baikalos.BaikalSettings;
 
 import android.util.Slog;
@@ -60,7 +73,7 @@ public class BaikalStaticService {
 
     private static final String TAG = "BaikalService";
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static boolean mSystemReady = false;
 
@@ -121,4 +134,123 @@ public class BaikalStaticService {
 	    return BaikalSettings.getAggressiveIdleEnabled() ||
 		   BaikalSettings.getExtremeIdleEnabled();
     }
+<<<<<<< HEAD
+=======
+
+    public static boolean processAlarmLocked(AlarmManagerService.Alarm a, AlarmManagerService.Alarm pendingUntil) {
+
+        if ( a == pendingUntil ) {
+            if( DEBUG ) {
+                Slog.i(TAG,"DeviceIdleAlarm: unrestricted:" + a.statsTag + ":" + a.toString() + ", ws=" + a.workSource );
+            }
+            return false;
+        }
+
+        if( a.alarmClock != null ) return false;
+
+        if( !isEnergySaveMode() ) return false;
+
+        /*
+        if( a.statsTag.contains("WifiConnectivityManager Schedule Periodic Scan Timer") ) {  
+            final long now = SystemClock.elapsedRealtime();
+            if( (a.when - now)  < 60*60*1000 ) {
+                a.when = a.whenElapsed = a.maxWhenElapsed = a.origWhen = now + 60*60*1000;
+            } 
+            if( DEBUG ) {
+                Slog.i(TAG,"DeviceIdleAlarm: AdjustAlarm (unrestricted):" + a.statsTag + ":" + a.toString() + ", ws=" + a.workSource );
+            }
+            return true;
+        }*/
+
+        // a.statsTag.contains("WifiConnectivityManager Schedule Watchdog Timer") ||
+        // a.statsTag.contains("WifiConnectivityManager Schedule Periodic Scan Timer") ||
+        // a.statsTag.contains("WifiConnectivityManager Restart") ) {
+
+
+	    boolean block = false;
+
+        a.wakeup = a.type == AlarmManager.ELAPSED_REALTIME_WAKEUP
+                || a.type == AlarmManager.RTC_WAKEUP;
+
+        if ( ((a.flags&(AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED | 
+		       AlarmManager.FLAG_ALLOW_WHILE_IDLE | 
+		       AlarmManager.FLAG_WAKE_FROM_IDLE)) != 0 
+            || a.wakeup)) {
+
+	        if( a.uid < Process.FIRST_APPLICATION_UID  ) {
+                if( a.statsTag.equals("doze_time_tick") ) {
+                    a.flags |= AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED;        
+                    a.wakeup = true;
+                    a.type |= AlarmManager.ELAPSED_REALTIME_WAKEUP;
+                } else if( a.statsTag.contains("NETWORK_LINGER_COMPLETE") ||
+            	    a.statsTag.contains("WriteBufferAlarm") ||
+            	    a.statsTag.contains("WificondScannerImpl") ||
+            	    a.statsTag.contains("WifiConnectivityManager") ) {
+            	    a.flags &= ~(AlarmManager.FLAG_WAKE_FROM_IDLE);
+            	    a.wakeup = false;
+                }  else if( a.statsTag.contains("*sync") ||
+            	    a.statsTag.contains("*job") || 
+                    a.statsTag.contains("com.android.server.NetworkTimeUpdateService.action.POLL") ||
+                    a.statsTag.contains("APPWIDGET_UPDATE") ) {
+                    block = true;
+                } 
+	        } else {
+        	    if( a.packageName.startsWith("com.google.android.gms") ) {
+            	    block = true;
+        	    } else if( a.statsTag.contains("StkMenuActivity") ) {
+            	    block = true;
+        	    } else if( a.statsTag.contains("com.google.android.clockwork.TIME_ZONE_SYNC") ) {
+            	    block = true;
+        	    } else if( a.statsTag.contains("org.altbeacon.beacon.startup.StartupBroadcastReceiver") ) {
+            	    block = true;
+                }
+		        if( (a.flags & AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED) == 0 ) {
+		            block = true;
+		        }
+            }
+        } 
+
+	    if( block ) {
+	        a.wakeup = false;
+            a.flags &= ~(AlarmManager.FLAG_WAKE_FROM_IDLE 
+                    | AlarmManager.FLAG_ALLOW_WHILE_IDLE
+                    | AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED);
+
+            if( DEBUG ) {
+                Slog.i(TAG,"DeviceIdleAlarm: restricted:" + a.statsTag + ":" + a.toString() + ", ws=" + a.workSource ); 
+            }
+	    }
+
+	    if( !a.wakeup && (a.type == AlarmManager.ELAPSED_REALTIME_WAKEUP
+          || a.type == AlarmManager.RTC_WAKEUP ) ) {
+	        if( a.type == AlarmManager.ELAPSED_REALTIME_WAKEUP ) a.type = AlarmManager.ELAPSED_REALTIME;
+	        else a.type = AlarmManager.RTC;
+            a.wakeup = false;
+            if( DEBUG ) {
+                Slog.i(TAG,"DeviceIdleAlarm: blocked:" + a.statsTag + ":" + a.toString() + ", ws=" + a.workSource );
+            }
+
+	    }
+
+        if( a.wakeup ) {
+            if( DEBUG ) {
+                Slog.i(TAG,"DeviceIdleAlarm: unrestricted:" + a.statsTag + ":" + a.toString() + ", ws=" + a.workSource );
+            }
+        }
+	    return block;
+   }
+
+    public static boolean isJobBlacklisted(JobInfo job, JobWorkItem work, int uId, String packageName,
+            int userId, String tag) {
+        return false;
+    }
+
+    //boolean updateSingleJobRestrictionLocked(boolean canRun, JobStatus jobStatus, int activeState) {
+    //    final int uid = jobStatus.getSourceUid();
+    //    final String packageName = jobStatus.getSourcePackageName();
+    //    return canRun;
+    //}
+
+
+>>>>>>> 4a301ebf0083... Squashed commit
 }

@@ -74,6 +74,7 @@ public class AppProfileManager extends MessageHandler {
     private static AppProfile mCurrentProfile = null;
 
     private int mActiveFrameRate=-2;
+    private int mDefaultFps = -10;
 
     private boolean mReaderModeAvailable = false;
     private boolean mVariableFps = false;
@@ -140,11 +141,26 @@ public class AppProfileManager extends MessageHandler {
     }
 
     protected void setActiveFrameRateLocked(int fps) {
-        if( mActiveFrameRate != fps ) {
-            if( setHwFrameRateLocked(fps, false) ) {
-                mActiveFrameRate = fps;
+        int setfps = fps;
+        if( fps == -1 ) {
+            try {
+                int value = Integer.parseInt(SystemProperties.get("persist.baikal.fps.default","4"));
+                if( value != mDefaultFps ) { 
+                    mDefaultFps = value;
+                    if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG,"mDefaultFps changed=" + mDefaultFps);
+                    setfps = mDefaultFps-1;
+                }
+            } catch( Exception e ) {
+                if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG,"mDefaultFps:", e);
+                mDefaultFps = 4;
+                setfps = 3;
             }
         }
+        //if( mActiveFrameRate != fps || setfps != fps ) {
+            if( setHwFrameRateLocked(setfps, false) ) {
+                mActiveFrameRate = fps;
+            }
+        //}
     }
 
     protected void setDeviceIdleModeLocked(boolean mode) {
@@ -212,11 +228,11 @@ public class AppProfileManager extends MessageHandler {
 
             BaikalSettings.setTopApp(mTopUid, mTopPackageName);
 
-            AppProfile profile = mAppSettings.getProfile(uid,packageName);
+            AppProfile profile = mAppSettings.getProfile(/*uid,*/packageName);
             synchronized(mCurrentProfileSync) {
                 mCurrentProfile = profile;
             }
-            if( profile == null || uid < Process.FIRST_APPLICATION_UID ) {
+            if( profile == null /*|| uid < Process.FIRST_APPLICATION_UID */) {
                 setReaderModeLocked(false);
                 setActivePerfProfileLocked("default");
                 setActiveThermProfileLocked("default");
@@ -226,7 +242,8 @@ public class AppProfileManager extends MessageHandler {
                 setActivePerfProfileLocked(profile.mPerfProfile);
                 setActiveThermProfileLocked(profile.mThermalProfile);
                 setActiveFrameRateLocked(profile.mFrameRate-1);
-                setReaderModeLocked(profile.mReader);
+                if( mReaderModeAvailable ) setReaderModeLocked(profile.mReader);
+                else setReaderModeLocked(false);
                 Actions.sendBrightnessOverrideChanged(setBrightnessOverrideLocked(profile.mBrightness));
             }
         }
@@ -323,15 +340,21 @@ public class AppProfileManager extends MessageHandler {
     }
 
     private boolean setHwFrameRateLocked(int fps, boolean override) {
+        if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG,"setHwFrameRateLocked fps=" + fps);
         if( !mVariableFps ) return true;
         if( mIdleProfileActive && !override ) return false;
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken("android.ui.ISurfaceComposer");
-        if( fps == -1 ) fps = 3;
+        if( fps == -1 || fps == -2 ) { 
+            if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG,"setHwFrameRateLocked default=" + mDefaultFps);
+            fps = mDefaultFps-1;
+        }
+        if( fps < 0 || fps > 4  ) fps = 3;
         data.writeInt(fps);
         try {
             ServiceManager.getService("SurfaceFlinger").transact(1035, data, (Parcel) null, 0);
         } catch (RemoteException e) {
+            data.recycle();
             return false;
         }
         data.recycle();
@@ -364,13 +387,13 @@ public class AppProfileManager extends MessageHandler {
 
     private void SystemPropertiesSet(String key, String value) {
         if( Constants.DEBUG_APP_PROFILE ) {
-            Slog.d(TAG, "SystemProperties.set("+key+","+value+")");
+            if( Constants.DEBUG_APP_PROFILE ) Slog.d(TAG, "SystemProperties.set("+key+","+value+")");
         }
         try {
             SystemProperties.set(key,value);
         }
         catch( Exception e ) {
-            Slog.e(TAG, "SystemPropertiesSet: unable to set property "+key+" to "+value);
+            if( Constants.DEBUG_APP_PROFILE ) Slog.e(TAG, "SystemPropertiesSet: unable to set property "+key+" to "+value);
         }
     }
 
@@ -437,7 +460,7 @@ public class AppProfileManager extends MessageHandler {
          */
         @Override
         public void onCallStateChanged(int state, String incomingNumber) {
-            Slog.i(TAG,"PhoneStateListener: onCallStateChanged(" + state + "," + incomingNumber + ")");
+            if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG,"PhoneStateListener: onCallStateChanged(" + state + "," + incomingNumber + ")");
 
             synchronized (AppProfileManager.this) {
                 onCallStateChangedLocked(state,incomingNumber);
@@ -453,7 +476,7 @@ public class AppProfileManager extends MessageHandler {
          */
         @Override
         public void onPreciseCallStateChanged(PreciseCallState callState) {
-            Slog.i(TAG,"PhoneStateListener: onPreciseCallStateChanged(" + callState + ")");
+            if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG,"PhoneStateListener: onPreciseCallStateChanged(" + callState + ")");
             synchronized (AppProfileManager.this) {
                 onPreciseCallStateChangedLocked(callState);
             }

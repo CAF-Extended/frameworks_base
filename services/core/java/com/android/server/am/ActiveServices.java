@@ -702,7 +702,11 @@ public final class ActiveServices {
         // If we're starting indirectly (e.g. from PendingIntent), figure out whether
         // we're launching into an app in a background state.  This keys off of the same
         // idleness state tracking as e.g. O+ background service start policy.
-        final boolean bgLaunch = !mAm.isUidActiveLOSP(r.appInfo.uid);
+        boolean bgLaunch = !mAm.isUidActiveLOSP(r.appInfo.uid);
+
+        if( BaikalSettings.getExtremeIdleEnabled() || BaikalSettings.getStaminaMode() ) {
+            bgLaunch = !(BaikalSettings.getTopAppUid() == r.appInfo.uid);
+        }
 
         // If the app has strict background restrictions, we treat any bg service
         // start analogously to the legacy-app forced-restrictions case, regardless
@@ -759,6 +763,14 @@ public final class ActiveServices {
             }
         }
 
+        if( BaikalSettings.getAppBlocked(r.appInfo.uid, r.packageName) ) {
+            Slog.w(TAG, "App start blocked: service "
+                    + service + " to " + r.shortInstanceName
+                    + " from pid=" + callingPid + " uid=" + callingUid
+                    + " pkg=" + callingPackage + " startFg?=" + fgRequired);
+            r.stopIfKilled = true;
+            return null;
+        }
 
         if( mAm.getAppStartModeLOSP(r.appInfo.uid, r.packageName,
                     r.appInfo.targetSdkVersion, callingPid, false, true, true) == ActivityManager.APP_START_MODE_DISABLED ) {
@@ -3619,9 +3631,10 @@ public final class ActiveServices {
                     + " - system is shutting down");
             return false;
         }
+
         if( r.stopIfKilled ) {
-            Slog.w(TAG, "Not scheduling restart of crashed service " + r.shortInstanceName
-                    + " - stopIfKilled");
+            Slog.w(TAG, "Not scheduling restart of stopIfKilled service " + r.shortInstanceName
+                    + " - disabled");
             return false;
         }
 

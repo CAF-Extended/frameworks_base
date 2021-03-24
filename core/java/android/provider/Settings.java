@@ -15681,7 +15681,39 @@ public final class Settings {
         @Readable        
         @SuppressLint("NoSettingsProvider")        
         public static final String BAIKALOS_GMS_IDLE_RESTRICTED = "baikalos_gms_idle_restricted";
- 
+        @Readable        
+        @SuppressLint("NoSettingsProvider")   
+        public static final String BAIKALOS_FILTER_SERVICES = "baikalos_filter_services";
+        @Readable        
+        @SuppressLint("NoSettingsProvider")           
+        public static final String BAIKALOS_FILTER_ALARMS = "baikalos_filter_alarms";
+        @Readable        
+        @SuppressLint("NoSettingsProvider")           
+        public static final String BAIKALOS_FILTER_BCAST = "baikalos_filter_bcast";
+        @Readable        
+        @SuppressLint("NoSettingsProvider")           
+        public static final String BAIKALOS_FILTER_ACTIVITY = "baikalos_filter_activity";
+        @Readable        
+        @SuppressLint("NoSettingsProvider")   
+        public static final String BAIKALOS_FILTER_SERVICES_IDLE = "baikalos_filter_services_idle";
+        @Readable        
+        @SuppressLint("NoSettingsProvider")           
+        public static final String BAIKALOS_FILTER_ALARMS_IDLE = "baikalos_filter_alarms_idle";
+        @Readable        
+        @SuppressLint("NoSettingsProvider")           
+        public static final String BAIKALOS_FILTER_BCAST_IDLE = "baikalos_filter_bcast_idle";
+        @Readable        
+        @SuppressLint("NoSettingsProvider")           
+        public static final String BAIKALOS_FILTER_ACTIVITY_IDLE = "baikalos_filter_activity_idle";
+        
+        @Readable        
+        @SuppressLint("NoSettingsProvider")   
+        public static final String BAIKALOS_ALARMS_NOWAKE = "baikalos_alarms_no_wake";
+
+        @Readable        
+        @SuppressLint("NoSettingsProvider")   
+        public static final String BAIKALOS_DEBUG = "baikalos_debug";
+
         /* End of BaikalOS Global settings */
 
 

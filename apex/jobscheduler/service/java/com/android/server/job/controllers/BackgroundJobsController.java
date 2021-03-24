@@ -204,6 +204,8 @@ public final class BackgroundJobsController extends StateController {
         final boolean canRun = !mAppStateTracker.areJobsRestricted(uid, packageName,
                 jobStatus.canRunInBatterySaver());
 
+        //canRun = BaikalStaticService.updateSingleJobRestrictionLocked(canRun, jobStatus, activeState);
+
         final boolean isActive;
         if (activeState == UNKNOWN) {
             isActive = mAppStateTracker.isUidActive(uid);
