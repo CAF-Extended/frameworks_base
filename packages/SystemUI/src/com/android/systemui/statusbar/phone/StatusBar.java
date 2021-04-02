@@ -929,7 +929,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateDisplaySize();
 
         mVibrateOnOpening = mContext.getResources().getBoolean(
-                R.bool.config_vibrateOnIconAnimation);
+                com.android.internal.R.bool.config_vibrateOnIconAnimation);
 
         // start old BaseStatusBar.start().
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
