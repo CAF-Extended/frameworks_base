@@ -28,6 +28,9 @@ import com.android.internal.baikalos.DevProfileManager;
 <<<<<<< HEAD
 =======
 
+import com.android.internal.baikalos.AppProfile;
+import com.android.internal.baikalos.AppProfileSettings;
+
 import android.app.job.IJobScheduler;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
@@ -39,6 +42,7 @@ import android.app.job.JobWorkItem;
 
 >>>>>>> 4a301ebf0083... Squashed commit
 import com.android.internal.baikalos.BaikalSettings;
+import com.android.internal.baikalos.BaikalUtils;
 
 import android.util.Slog;
 
@@ -242,6 +246,31 @@ public class BaikalStaticService {
 
     public static boolean isJobBlacklisted(JobInfo job, JobWorkItem work, int uId, String packageName,
             int userId, String tag) {
+
+        if( !BaikalSettings.getStaminaMode() &&
+            !BaikalSettings.getExtremeIdleEnabled() &&
+            !BaikalSettings.getAggressiveIdleEnabled() ) {
+            if( DEBUG ) Slog.i(TAG,"isJobBlacklisted: Not in energy saving mode ");
+            return false;
+        }
+
+
+        if( BaikalSettings.getTopAppUid() == uId ) return false;
+
+        if( BaikalSettings.getAppBlocked(uId, packageName) ) {
+            //if( DEBUG ) {
+                Slog.i(TAG,"isJobBlacklisted: blocked: uid=" + uId + ", pkg=" + packageName + " -> " + job + " : " + work);
+            //}
+            return true;
+        }
+
+        if( !allowBackgroundStart(uId, packageName) ) {
+            //if( DEBUG ) {
+                Slog.i(TAG,"isJobBlacklisted: restricted: uid=" + uId + ", pkg=" + packageName + " -> " + job + " : " + work);
+            //}
+            return true;
+        }
+            
         return false;
     }
 
@@ -250,6 +279,77 @@ public class BaikalStaticService {
     //    final String packageName = jobStatus.getSourcePackageName();
     //    return canRun;
     //}
+
+    public static boolean updateSingleJobRestrictionLocked(boolean canRun, int uid, String packageName, int activeState, JobInfo jobInfo) {
+        if( !BaikalSettings.getStaminaMode() &&
+            !BaikalSettings.getExtremeIdleEnabled() &&
+            !BaikalSettings.getAggressiveIdleEnabled() ) {
+            if( DEBUG ) Slog.i(TAG,"updateSingleJobRestrictionLocked: Not in energy saving mode ");
+            return canRun;
+        }
+
+        if( BaikalSettings.getTopAppUid() == uid ) return true;
+
+        AppProfile profile = AppProfileSettings.getProfileStatic(packageName);
+        if( profile == null ) return canRun;
+
+
+        if( BaikalUtils.isGmsUid(uid)  ) {
+            if( BaikalSettings.getAppBlocked(uid, packageName) ) {
+                Slog.i(TAG,"updateSingleJobRestrictionLocked: GMS blocked: uid=" + uid + ", pkg=" + packageName + ", job=" + jobInfo);
+                return false;
+            }
+            return !jobGmsBlackListed(jobInfo);
+        }
+
+        
+        if( profile.mBackground < 0 ) {
+            //if( DEBUG ) {
+                Slog.i(TAG,"updateSingleJobRestrictionLocked: whitelisted: uid=" + uid + ", pkg=" + packageName + ", job=" + jobInfo);
+            //}
+            return true;
+        }
+        if( !getBackgroundMode(profile) ) {
+            //if( DEBUG ) { 
+                Slog.i(TAG,"updateSingleJobRestrictionLocked: restricted : uid=" + uid + ", pkg=" + packageName + ", job=" + jobInfo);
+            //}
+            return false;
+        }
+        return canRun;
+    }
+
+
+    private static boolean jobGmsBlackListed(JobInfo jobInfo) {
+        Slog.i(TAG,"updateSingleJobRestrictionLocked: GMS job service=" + jobInfo.getService().toString());
+        return false;
+    }
+
+    public static boolean allowBackgroundStart(int uid, String packageName) {
+
+        if( !BaikalSettings.getStaminaMode() &&
+            !BaikalSettings.getExtremeIdleEnabled() &&
+            !BaikalSettings.getAggressiveIdleEnabled() ) {
+            if( DEBUG ) Slog.i(TAG,"allowBackgroundStart: Not in energy saving mode ");
+            return true;
+        }
+
+        if( BaikalSettings.getTopAppUid() == uid ) return true;
+        AppProfile profile = AppProfileSettings.getProfileStatic(packageName);
+        if( profile == null ) return true;
+        if( !getBackgroundMode(profile) ) return false;
+        return true;
+    }
+
+    private static boolean getBackgroundMode(AppProfile profile) {
+        if( Runtime.isIdleMode()  ) {
+            if( profile.mBackground > 1 && BaikalSettings.getExtremeIdleEnabled() ) return false;
+            if( profile.mBackground > 0 && BaikalSettings.getAggressiveIdleEnabled() ) return false;
+        } else {
+            if( profile.mBackground > 2 && BaikalSettings.getAggressiveIdleEnabled() ) return false;
+            if( profile.mBackground > 1 && BaikalSettings.getExtremeIdleEnabled() ) return false;
+        }
+        return true;
+    }
 
 
 >>>>>>> 4a301ebf0083... Squashed commit
