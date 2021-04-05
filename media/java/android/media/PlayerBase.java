@@ -32,6 +32,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 
+import com.android.internal.baikalos.BaikalSettings;
+
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
@@ -46,7 +48,7 @@ public abstract class PlayerBase {
     private static final String TAG = "PlayerBase";
     /** Debug app ops */
     private static final boolean DEBUG_APP_OPS = false;
-    private static final boolean DEBUG = DEBUG_APP_OPS || false;
+    private static final boolean DEBUG = DEBUG_APP_OPS || true;
     private static IAudioService sService; //lazy initialization, use getService()
 
     // parameters of the player that affect AppOps
@@ -227,8 +229,8 @@ public abstract class PlayerBase {
     private void updatePlayerVolume() {
         final float finalLeftVol, finalRightVol;
         synchronized (mLock) {
-            finalLeftVol = mVolMultiplier * mLeftVolume * mPanMultiplierL;
-            finalRightVol = mVolMultiplier * mRightVolume * mPanMultiplierR;
+            finalLeftVol = mVolMultiplier * mLeftVolume * mPanMultiplierL * baikalMultiplier;
+            finalRightVol = mVolMultiplier * mRightVolume * mPanMultiplierR* baikalMultiplier;
         }
         playerSetVolume(false /*muting*/, finalLeftVol, finalRightVol);
     }
