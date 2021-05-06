@@ -50,7 +50,11 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
+<<<<<<< HEAD
 import com.android.internal.R;
+=======
+import com.android.internal.baikalos.BaikalSettings;
+>>>>>>> a309e087e44d... ReaderMode brightness and forced sonification
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

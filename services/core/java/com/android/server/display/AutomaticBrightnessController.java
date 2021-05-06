@@ -41,7 +41,7 @@ import android.util.EventLog;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.TimeUtils;
-
+import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.display.BrightnessSynchronizer;
 import com.android.internal.os.BackgroundThread;
@@ -323,7 +323,7 @@ class AutomaticBrightnessController {
         // switch to a wake-up light sensor instead but for now we will simply disable the sensor
         // and hold onto the last computed screen auto brightness.  We save the dozing flag for
         // debugging purposes.
-        boolean dozing = (displayPolicy == DisplayPowerRequest.POLICY_DOZE);
+        boolean dozing =  (displayPolicy == DisplayPowerRequest.POLICY_DOZE);
         boolean changed = setBrightnessConfiguration(configuration);
         changed |= setDisplayPolicy(displayPolicy);
         if (userChangedAutoBrightnessAdjustment) {
