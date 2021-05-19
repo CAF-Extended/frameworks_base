@@ -5111,11 +5111,6 @@ public final class Settings {
          */
         public static final String LOCKSCREEN_ALBUMART_FILTER = "lockscreen_albumart_filter";
 
-        /** Whether to skip music track with volume rocker 
-        /**
-         * @hide
-         */
-        public static final String VOLUME_BUTTON_MUSIC_CONTROL = "volume_button_music_control";
 
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
