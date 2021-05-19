@@ -37,6 +37,8 @@ import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.SystemClock;
@@ -46,7 +48,7 @@ import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
-
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.R;
 
 import java.util.Arrays;
