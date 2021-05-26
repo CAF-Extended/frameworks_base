@@ -1110,6 +1110,10 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (odpojeno)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"Spojení se nezdařilo. Zkuste to znovu."</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"Spárovat nové zařízení"</string>
+ 
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Problém s načtením měřiče baterie"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Klepnutím zobrazíte další informace"</string>
+ 
+    <string name="media_output_title" msgid="115223550977351699">"Přehrávat média v"</string>
+ 
 </resources>
