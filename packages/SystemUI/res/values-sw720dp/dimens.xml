@@ -17,10 +17,10 @@
 -->
 <resources>
 
-    <!-- ======================================== -->
+    <!--      ===== -->
     <!-- The following resources were recently moved from sw600dp; there may
          be situations where they don't sync up perfectly with PhoneStatusBar. -->
-    <!-- ======================================== -->
+    <!--      ===== -->
 
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">1dp</dimen>
