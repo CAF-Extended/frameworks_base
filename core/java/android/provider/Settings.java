@@ -5376,7 +5376,15 @@ public final class Settings {
          * @hide
          */
         public static final String GAMING_MODE_DYNAMIC_STATE = "gaming_mode_dynamic_state";
+
+        /**
+         * Whether to automatically Boost gaming
+         * if the launched app is a game
+         * @hide
+         */
+        public static final String GAMING_MODE_FPS_TOGGLE = "gaming_mode_fps_toggle";
         
+                
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
          * PUBLIC_SETTINGS below. If the new setting is hidden you have to add
