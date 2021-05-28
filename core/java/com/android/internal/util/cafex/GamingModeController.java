@@ -32,6 +32,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.SystemProperties;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -261,6 +262,11 @@ public class GamingModeController {
         //}
 
         // Ringer mode (0: Off, 1: Vibrate, 2:DND: 3:Silent)
+        boolean fpsmode = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.GAMING_MODE_FPS_TOGGLE, 1) == 1;
+        if (fpsmode) {
+             SystemProperties.set("vendor.fps.boost", "true");
+        }        
         int ringerMode = Settings.System.getInt(mContext.getContentResolver(),
             Settings.System.GAMING_MODE_RINGER_MODE, 0);
         if (ringerMode != 0) {
@@ -302,6 +308,7 @@ public class GamingModeController {
         //    Settings.System.putInt(mContext.getContentResolver(),
         //        Settings.Secure.HARDWARE_KEYS_DISABLE, mHwKeysState);
         //}
+        SystemProperties.set("vendor.fps.boost", "false");        
         int ringerMode = Settings.System.getInt(mContext.getContentResolver(),
                  Settings.System.GAMING_MODE_RINGER_MODE, 0);
         if (ringerMode != 0 && (mRingerState != getRingerModeInternal() ||
