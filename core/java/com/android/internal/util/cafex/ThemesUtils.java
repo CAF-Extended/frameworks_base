@@ -64,6 +64,7 @@ public class ThemesUtils {
             "com.android.theme.icon.taperedrect",
             "com.android.theme.icon.teardrop",
             "com.android.theme.icon.vessel",
+            "com.android.theme.icon.rounded",
     };
 
     public static final String[] PITCH_BLACK = {
