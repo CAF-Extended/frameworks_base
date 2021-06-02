@@ -130,13 +130,13 @@ public class ThemeTile extends QSTileImpl<BooleanState> {
         sStyleItems.add(new ThemeTileItem(UiModeManager.MODE_NIGHT_YES, -1,
                 R.string.system_theme_style_pitchblack, "pitch_black"));
         sStyleItems.add(new ThemeTileItem(UiModeManager.MODE_NIGHT_YES, -1,
-                R.string.system_theme_style_solarizeddark, "solarized_dark"));
+                R.string.system_theme_style_blue, "blue"));
         sStyleItems.add(new ThemeTileItem(UiModeManager.MODE_NIGHT_YES, -1,
                 R.string.system_theme_style_charcoalblack, "charcoalblack"));
         sStyleItems.add(new ThemeTileItem(UiModeManager.MODE_NIGHT_YES, -1,
                 R.string.system_theme_style_clear, "clear"));
         sStyleItems.add(new ThemeTileItem(UiModeManager.MODE_NIGHT_YES, -1,
-                R.string.system_theme_style_ethereal, "ethereal"));
+                R.string.system_theme_style_night, "night"));
         sStyleItems.add(new ThemeTileItem(UiModeManager.MODE_NIGHT_YES, -1,
                 R.string.system_theme_style_flame, "flame"));
         sStyleItems.add(new ThemeTileItem(UiModeManager.MODE_NIGHT_YES, -1,
@@ -329,11 +329,11 @@ public class ThemeTile extends QSTileImpl<BooleanState> {
                         e.printStackTrace();
                     }
                 }
-                for (int i = 0; i < ThemesUtils.SOLARIZED_DARK.length; i++) {
-                    String solarized_dark = ThemesUtils.SOLARIZED_DARK[i];
+                for (int i = 0; i < ThemesUtils.BLUE.length; i++) {
+                    String blue = ThemesUtils.BLUE[i];
                     try {
-                        mOverlayManager.setEnabled(solarized_dark,
-                                themeItem.uri.equals("solarized_dark"), USER_SYSTEM);
+                        mOverlayManager.setEnabled(blue,
+                                themeItem.uri.equals("blue"), USER_SYSTEM);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }
@@ -356,11 +356,11 @@ public class ThemeTile extends QSTileImpl<BooleanState> {
                         e.printStackTrace();
                     }
                 }
-                for (int i = 0; i < ThemesUtils.ETHEREAL.length; i++) {
-                    String ethereal = ThemesUtils.ETHEREAL[i];
+                for (int i = 0; i < ThemesUtils.NIGHT.length; i++) {
+                    String night = ThemesUtils.NIGHT[i];
                     try {
-                        mOverlayManager.setEnabled(ethereal,
-                                themeItem.uri.equals("ethereal"), USER_SYSTEM);
+                        mOverlayManager.setEnabled(night,
+                                themeItem.uri.equals("night"), USER_SYSTEM);
                     } catch (RemoteException e) {
                         e.printStackTrace();
                     }

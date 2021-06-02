@@ -71,8 +71,8 @@ public class ThemesUtils {
             "com.android.theme.color.primary.black",
     };
 
-    public static final String[] SOLARIZED_DARK = {
-            "com.android.theme.color.primary.solarized",
+    public static final String[] BLUE = {
+            "com.android.theme.color.primary.blue",
     };
 
     public static final String[] CHARCOAL_BLACK = {
@@ -83,8 +83,8 @@ public class ThemesUtils {
             "com.android.theme.color.primary.clear",
     };
 
-    public static final String[] ETHEREAL = {
-            "com.android.theme.color.primary.ethereal",
+    public static final String[] NIGHT = {
+            "com.android.theme.color.primary.night",
     };
 
     public static final String[] FLAME = {
