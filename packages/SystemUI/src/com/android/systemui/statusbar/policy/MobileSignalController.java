@@ -202,7 +202,7 @@ public class MobileSignalController extends SignalController<
         void observe() {
             ContentResolver resolver = mContext.getContentResolver();
             resolver.registerContentObserver(
-                    Settings.System.getUriFor(Settings.System.SHOW_FOURG_ICON), false,
+                    Settings.System.getUriFor(Settings.System.SHOW_FOURG_ICON), true,
                     this, UserHandle.USER_ALL);
             updateSettings();
         }
@@ -220,7 +220,7 @@ public class MobileSignalController extends SignalController<
         ContentResolver resolver = mContext.getContentResolver();
 
         mShow4gForLte = Settings.System.getIntForUser(resolver,
-                Settings.System.SHOW_FOURG_ICON, 0,
+                Settings.System.SHOW_FOURG_ICON, 1,
                 UserHandle.USER_CURRENT) == 1;
 
         mapIconSets();
