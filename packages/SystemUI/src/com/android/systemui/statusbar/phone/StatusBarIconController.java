@@ -488,7 +488,7 @@ public interface StatusBarIconController {
             switch (key) {
                 case USE_OLD_MOBILETYPE:
                     mOldStyleType =
-                        TunerService.parseIntegerSwitch(newValue, false);
+                        TunerService.parseIntegerSwitch(newValue, true);
                     updateOldStyleMobileDataIcons();
                     break;
                 default:
