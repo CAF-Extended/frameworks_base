@@ -1,4 +1,4 @@
-F/*
+/*
  * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
@@ -321,23 +321,15 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
     };
 
-    private NavigationBarTransitions.DarkIntensityListener mOrientationHandleIntensityListener =
-            new NavigationBarTransitions.DarkIntensityListener() {
-                @Override
-                public void onDarkIntensity(float darkIntensity) {
-                    mOrientationHandle.setDarkIntensity(darkIntensity);
-                }
-            };
-    };
-    
     private final ContextButtonListener mRotationButtonListener = (button, visible) -> {
         if (visible) {
             // If the button will actually become visible and the navbar is about to hide,
             // tell the statusbar to keep it around for longer
             mAutoHideController.touchAutoHide();
+            mNavigationBarView.notifyActiveTouchRegions();
         }
     };
-
+    
     private final Runnable mAutoDim = () -> getBarTransitions().setAutoDim(true);
 
     private final ContentObserver mAssistContentObserver = new ContentObserver(
