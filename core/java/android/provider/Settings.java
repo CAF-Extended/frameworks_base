@@ -15683,6 +15683,25 @@ public final class Settings {
         public static final String BAIKALOS_GMS_IDLE_RESTRICTED = "baikalos_gms_idle_restricted";
         @Readable        
         @SuppressLint("NoSettingsProvider")   
+
+        /**
+         * This preference holds SBC option.
+         * @hide
+         */
+        @Readable        
+        @SuppressLint("NoSettingsProvider")            
+        public static final String BAIKALOS_SBC_BITRATE = "baikalos_sbc_bitrate";
+
+
+        /**
+         * This preference holds App Audio profile.
+         * @hide
+         */
+        @Readable        
+        @SuppressLint("NoSettingsProvider")            
+        public static final String BAIKALOS_AUIDO_PROFILE = "baikalos_audio_profile";
+        @Readable        
+        @SuppressLint("NoSettingsProvider")           
         public static final String BAIKALOS_FILTER_SERVICES = "baikalos_filter_services";
         @Readable        
         @SuppressLint("NoSettingsProvider")           
