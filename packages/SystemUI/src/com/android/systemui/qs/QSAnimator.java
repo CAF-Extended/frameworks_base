@@ -29,13 +29,13 @@ import com.android.systemui.qs.QSHost.Callback;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.qs.TouchAnimator.Listener;
-import com.android.systemui.R;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import com.android.systemui.R;
 
 public class QSAnimator implements Callback, PageListener, Listener, OnLayoutChangeListener,
         OnAttachStateChangeListener, Tunable {
@@ -87,8 +87,6 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         mQs = qs;
         mQuickQsPanel = quickPanel;
         mQsPanel = panel;
-        mMediaTopOffset = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.quick_settings_top_margin_media_extra);
         mQsPanel.addOnAttachStateChangeListener(this);
         qs.getView().addOnLayoutChangeListener(this);
         if (mQsPanel.isAttachedToWindow()) {
@@ -101,6 +99,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             Log.w(TAG, "QS Not using page layout");
         }
         panel.setPageListener(this);
+
+        mMediaTopOffset = mContext.getResources().getDimensionPixelSize(R.dimen.quick_settings_top_margin_media_extra);
     }
 
     public void onRtlChanged() {
@@ -286,6 +286,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         }
 
         View brightnessView = mQsPanel.getBrightnessView();
+        View footerView = mQsPanel.getFooterView();
         if (brightnessView != null && Utils.useQsMediaPlayer(mContext) && !mQsPanel.shouldUseHorizontalLayout()
                 && mQsPanel.isMediaHostVisible()) {
             View mQsPanelMediaHostView = mQsPanel.getMediaHost().getHostView();
@@ -296,9 +297,22 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             } else {
                 translation = mQsPanelMediaHostView.getHeight() - mQuickQsPanelMediaHostView.getHeight();
             }
-            mBrightnessAnimator = new TouchAnimator.Builder().addFloat(brightnessView, "translationY", translation, 0)
+            float translationFooter = 0.0f;
+            if (mQsPanel.isLandscape()) {
+                translationFooter = mQsPanel.getFooterHeight();
+            }
+            mBrightnessAnimator = new TouchAnimator.Builder()
+                    .addFloat(brightnessView, "translationY", translation, 0)
+                    .addFloat(footerView, "translationY", translationFooter, 0)
                     .build();
             mAllViews.add(brightnessView);
+            mAllViews.add(footerView);
+        } else if (mQsPanel.isLandscape()) {
+            float translationFooter = mQsPanel.getFooterHeight();
+            mBrightnessAnimator = new TouchAnimator.Builder()
+                    .addFloat(footerView, "translationY", translationFooter, 0)
+                    .build();
+            mAllViews.add(footerView);
         } else {
             mBrightnessAnimator = null;
         }
@@ -407,9 +421,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         }
 
         if (position == 0f) {
-            mQuickQsPanel.getBrightnessView().setVisibility(View.VISIBLE);
+            mQuickQsPanel.getFooterView().setVisibility(View.VISIBLE);
         } else {
-            mQuickQsPanel.getBrightnessView().setVisibility(View.INVISIBLE);
+            mQuickQsPanel.getFooterView().setVisibility(View.INVISIBLE);
         }
     }
 
