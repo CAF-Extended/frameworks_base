@@ -40,7 +40,6 @@
             android:id="@+id/quick_settings_panel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
             android:background="@android:color/transparent"
             android:clipToPadding="false"
             android:clipChildren="false"
@@ -62,11 +61,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:elevation="4.0dip"
-        android:paddingBottom="8.0dip">
+        android:elevation="4dp"
+        android:paddingBottom="5dp">
         <View
-            android:layout_width="33.0dip"
-            android:layout_height="4.0dip"
+            android:layout_width="46dp"
+            android:layout_height="3dp"
             android:background="@drawable/qs_footer_drag_handle" />
     </FrameLayout>
 
