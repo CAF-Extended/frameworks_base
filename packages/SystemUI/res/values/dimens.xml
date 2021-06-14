@@ -482,7 +482,6 @@
     <!-- The size of the gesture span needed to activate the "pull" notification expansion -->
     <dimen name="pull_span_min">25dp</dimen>
 
-
     <dimen name="qs_tile_height">106dp</dimen>
     <!--notification_side_paddings + notification_content_margin_start - (qs_quick_tile_size - qs_tile_icon_size) / 2 -->
     <dimen name="qs_tile_layout_margin_side">18dp</dimen>
@@ -1084,7 +1083,7 @@
     <dimen name="edge_margin">8dp</dimen>
 
     <!-- The absolute side margins of quick settings -->
-    <dimen name="quick_settings_bottom_margin_media">8dp</dimen>
+    <dimen name="quick_settings_bottom_margin_media">4dp</dimen>
     <dimen name="rounded_corner_content_padding">8dp</dimen>
     <dimen name="nav_content_padding">0dp</dimen>
     <dimen name="nav_quick_scrub_track_edge_padding">24dp</dimen>

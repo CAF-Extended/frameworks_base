@@ -47,12 +47,12 @@
     <color name="quick_settings_theme_tile_teal">#FF009688</color>
     <color name="quick_settings_theme_tile_yellow">#FFFFEB3B</color>
 
-    <!-- QS Drag handle -->
-    <color name="qs_footer_drag_handle">#ffc8c8c8</color>
-
     <!-- Clear all notifications button -->
     <color name="dismiss_all_background_color">@android:color/white</color>
     <color name="dismiss_all_background_color_ripple">#a8a8a8</color>
     <color name="dismiss_all_icon_color">#8a000000</color>
+
+    <!-- QS Drag handle -->
+    <color name="aospa_qs_footer_drag_handle">#ffc8c8c8</color>
         
 </resources>
