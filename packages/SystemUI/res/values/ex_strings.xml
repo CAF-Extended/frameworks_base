@@ -96,13 +96,7 @@
     <string name="biometric_dialog_button_use_face">Use Face</string>
     <!-- Scrolling Screenshot string -->
     <string name="scrollss">Scroll</string>
-    <!-- App Lock -->
-    <string name="applock_locked">&#160;is locked</string>
-    <string name="applock_fingerprint_face">, fingerprint or your face to unlock</string>
-    <string name="applock_face">&#160;or your face to unlock</string>
-    <string name="applock_fingerprint">&#160;or your fingerprint to unlock</string>
-    <string name="applock_credential">&#160;to unlock</string>
-    <string name="applock_unlock">Unlock</string>
+
     <!-- Navbar -->
     <string name="systemui_tuner_navbar_title">Layout</string>
     <string name="navigation_bar_format_title">Navbar format</string>
@@ -110,6 +104,8 @@
     <string name="navigation_bar_inverse_summary">Swap the order of recents and back buttons</string>
     <string name="navigation_bar_accessibility_dpad_left">Cursor left</string>
     <string name="navigation_bar_accessibility_dpad_right">Cursor right</string>
+    
+    <string name="applock_unlock">Unlock app</string>
 
     <!-- Name of the volte/vowifi status bar icon. -->
     <string name="status_bar_ims">VoLTE/VoWiFi</string>
