@@ -3107,14 +3107,9 @@ public final class PowerManagerService extends SystemService
                     }
                 }
                 
-                if( mIsPowered ) {              
-                    mDisplayPowerRequest.useAutoBrightness = true;
-                    mDisplayPowerRequest.dozeScreenBrightness = -1;
-                } else {
                     mDisplayPowerRequest.useAutoBrightness = false;
                     mDisplayPowerRequest.dozeScreenBrightness =
                             mDozeScreenBrightnessOverrideFromDreamManagerFloat;
-                }
             } else {
                 mDisplayPowerRequest.dozeScreenState = Display.STATE_UNKNOWN;
                 mDisplayPowerRequest.dozeScreenBrightness =
