@@ -24,6 +24,7 @@ import android.os.UserHandle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
+import android.os.SystemProperties;
 
 import android.content.Context;
 import android.content.ContentResolver;
@@ -126,7 +127,7 @@ public class AppProfileSettings extends ContentObserver {
 
                 profile = new AppProfile();
                 profile.mPackageName = info.packageName;
-                if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG, "Sync profile for packageName=" + profile.mPackageName + ", uid=" + info.applicationInfo.uid);
+                if( BaikalConstants.BAIKAL_DEBUG_APP_PROFILE ) Slog.i(TAG, "Sync profile for packageName=" + profile.mPackageName + ", uid=" + info.applicationInfo.uid);
                 updateProfileSystemSettings(profile);
                 updateProfileLocked(profile);
                 changed = true;
@@ -154,11 +155,15 @@ public class AppProfileSettings extends ContentObserver {
 
                 boolean whitelisted = mBackend.isWhitelisted(info.packageName);
 
+                if( !SystemProperties.get("b.spf."+info.packageName,"0").equals("0") ) {
+                    setZygoteSettings("b.spf.",info.packageName,"0");
+                }
+
                 if( runInBackground == AppOpsManager.MODE_ALLOWED &&
                     runAnyInBackground == AppOpsManager.MODE_ALLOWED &&
                     !whitelisted ) continue;
 
-                if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG, "Clearing background constraints packageName=" + info.packageName + 
+                if( BaikalConstants.BAIKAL_DEBUG_APP_PROFILE ) Slog.i(TAG, "Clearing background constraints packageName=" + info.packageName + 
                             ", uid=" + info.applicationInfo.uid);
 
 
@@ -220,7 +225,7 @@ public class AppProfileSettings extends ContentObserver {
 	                    if( uid == -1 ) continue;
                         if( uid < Process.FIRST_APPLICATION_UID ) continue;
                         if( !_profiles.containsKey(uid) ) {
-                            if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG, "Load profile for packageName=" + profile.mPackageName + ", uid=" + uid);
+                            if( BaikalConstants.BAIKAL_DEBUG_APP_PROFILE ) Slog.i(TAG, "Load profile for packageName=" + profile.mPackageName + ", uid=" + uid);
                             _profiles.put(uid, profile);
                         } else {
                             Slog.e(TAG, "Duplicated profile for uid=" + uid + ", packageName=" + profile.mPackageName);
@@ -228,6 +233,7 @@ public class AppProfileSettings extends ContentObserver {
                     }
                     updateProfileSystemSettings(profile);
                     updateSystemSettingsProfile(profile);
+                    updateProfileZygoteSettings(profile);
                 }
             }
 
@@ -241,6 +247,19 @@ public class AppProfileSettings extends ContentObserver {
         _staticProfilesByPackgeName =  _profilesByPackgeName;
         _staticProfiles = _profiles;
     }
+
+    private void updateProfileZygoteSettings(AppProfile profile) {
+        setZygoteSettings("b.spf.",profile.mPackageName,"" + profile.mSpoofDevice);
+    }
+
+    private void setZygoteSettings(String propPrefix, String packageName, String value) {
+        try {
+            SystemProperties.set(propPrefix + packageName,value);
+        } catch(Exception e) {
+            Slog.e(TAG, "BaikalService: Can't set Zygote settings:" + packageName, e);
+        }
+    }
+
 
     private void updateProfileSystemSettings(AppProfile profile) {
 
@@ -304,7 +323,7 @@ public class AppProfileSettings extends ContentObserver {
             case -1:
                 if( !mBackend.isWhitelisted(profile.mPackageName) ) {
                     synchronized(mBackend) {
-                        if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG, "Add to whitelist packageName=" + profile.mPackageName + ", uid=" + uid);
+                        if( BaikalConstants.BAIKAL_DEBUG_APP_PROFILE ) Slog.i(TAG, "Add to whitelist packageName=" + profile.mPackageName + ", uid=" + uid);
                         mBackend.addApp(profile.mPackageName);
                     }
                 }
@@ -317,7 +336,7 @@ public class AppProfileSettings extends ContentObserver {
                 if( runInBackground != AppOpsManager.MODE_ALLOWED ) setBackgroundMode(AppOpsManager.OP_RUN_IN_BACKGROUND,uid, profile.mPackageName,AppOpsManager.MODE_ALLOWED); 
                 if( mBackend.isWhitelisted(profile.mPackageName) ) {
                     synchronized(mBackend) {
-                        if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG, "Remove from whitelist packageName=" + profile.mPackageName + ", uid=" + uid);
+                        if( BaikalConstants.BAIKAL_DEBUG_APP_PROFILE ) Slog.i(TAG, "Remove from whitelist packageName=" + profile.mPackageName + ", uid=" + uid);
                         mBackend.removeApp(profile.mPackageName);
                     }
                 }
@@ -328,7 +347,7 @@ public class AppProfileSettings extends ContentObserver {
                 if( runInBackground != AppOpsManager.MODE_ALLOWED ) setBackgroundMode(AppOpsManager.OP_RUN_IN_BACKGROUND,uid, profile.mPackageName,AppOpsManager.MODE_ALLOWED); 
                 if( mBackend.isWhitelisted(profile.mPackageName) ) {
                     synchronized(mBackend) {
-                        if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG, "Remove from whitelist packageName=" + profile.mPackageName + ", uid=" + uid);
+                        if( BaikalConstants.BAIKAL_DEBUG_APP_PROFILE ) Slog.i(TAG, "Remove from whitelist packageName=" + profile.mPackageName + ", uid=" + uid);
                         mBackend.removeApp(profile.mPackageName);
                     }
                 }
@@ -339,7 +358,7 @@ public class AppProfileSettings extends ContentObserver {
                 if( runInBackground != AppOpsManager.MODE_IGNORED ) setBackgroundMode(AppOpsManager.OP_RUN_IN_BACKGROUND,uid, profile.mPackageName,AppOpsManager.MODE_IGNORED); 
                 if( mBackend.isWhitelisted(profile.mPackageName) ) {
                     synchronized(mBackend) {
-                        if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG, "Remove from whitelist packageName=" + profile.mPackageName + ", uid=" + uid);
+                        if( BaikalConstants.BAIKAL_DEBUG_APP_PROFILE ) Slog.i(TAG, "Remove from whitelist packageName=" + profile.mPackageName + ", uid=" + uid);
                         mBackend.removeApp(profile.mPackageName);
                     }
                 }
@@ -350,7 +369,7 @@ public class AppProfileSettings extends ContentObserver {
                 if( runInBackground != AppOpsManager.MODE_IGNORED ) setBackgroundMode(AppOpsManager.OP_RUN_IN_BACKGROUND,uid, profile.mPackageName,AppOpsManager.MODE_IGNORED); 
                 if( mBackend.isWhitelisted(profile.mPackageName) ) {
                     synchronized(mBackend) {
-                        if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG, "Remove from whitelist packageName=" + profile.mPackageName + ", uid=" + uid);
+                        if( BaikalConstants.BAIKAL_DEBUG_APP_PROFILE ) Slog.i(TAG, "Remove from whitelist packageName=" + profile.mPackageName + ", uid=" + uid);
                         mBackend.removeApp(profile.mPackageName);
                     }
                 }
@@ -360,7 +379,7 @@ public class AppProfileSettings extends ContentObserver {
     }
     
     private void setBackgroundMode(int op, int uid, String packageName, int mode) {
-        if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG, "Set AppOp " + op + " for packageName=" + packageName + ", uid=" + uid + " to " + mode);
+        if( BaikalConstants.BAIKAL_DEBUG_APP_PROFILE ) Slog.i(TAG, "Set AppOp " + op + " for packageName=" + packageName + ", uid=" + uid + " to " + mode);
         if( uid != -1 ) {
             getAppOpsManager().setMode(op, uid, packageName, mode);
         }
@@ -379,16 +398,16 @@ public class AppProfileSettings extends ContentObserver {
         for(Map.Entry<String, AppProfile> entry : _profilesByPackgeName.entrySet()) {
             updateSystemSettingsProfile(entry.getValue());
             if( entry.getValue().isDefault() ) { 
-                if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG, "Skip saving default profile for packageName=" + entry.getValue().mPackageName);
+                if( BaikalConstants.BAIKAL_DEBUG_APP_PROFILE ) Slog.i(TAG, "Skip saving default profile for packageName=" + entry.getValue().mPackageName);
                 continue;
             }
             int uid = getAppUidLocked(entry.getValue().mPackageName);
             if( uid == -1 ) { 
-                if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG, "Skip saving profile for packageName=" + entry.getValue().mPackageName + ". Seems app deleted");
+                if( BaikalConstants.BAIKAL_DEBUG_APP_PROFILE ) Slog.i(TAG, "Skip saving profile for packageName=" + entry.getValue().mPackageName + ". Seems app deleted");
                 continue;
             }
 
-            if( Constants.DEBUG_APP_PROFILE ) Slog.i(TAG, "Save profile for packageName=" + entry.getValue().mPackageName);
+            if( BaikalConstants.BAIKAL_DEBUG_APP_PROFILE ) Slog.i(TAG, "Save profile for packageName=" + entry.getValue().mPackageName);
             String entryString = entry.getValue().Serialize();
             if( entryString != null ) val += entryString + "|";
         } 
