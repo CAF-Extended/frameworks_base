@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2020 Benzo Rom
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+          http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+     <!-- Sync QS Tile -->
+    <string name="quick_settings_sync_label">Синхронизация</string>
+    <string name="accessibility_quick_settings_sync_off">Синхронизация выкл.</string>
+    <string name="accessibility_quick_settings_sync_on">Синхронизация вкл.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Синхронизация выключена.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Синхронизация включена.</string>
+
+    <!-- Always on Display Tile -->
+    <string name="quick_settings_always_on_display_label">Всегда включенный экран</string>
+    <string name="accessibility_quick_settings_always_on_display_off">Всегда включенный экран выкл.</string>
+    <string name="accessibility_quick_settings_always_on_display_on">Всегда включенный экран вкл.</string>
+    <string name="accessibility_quick_settings_always_on_display_changed_off">Всегда включенный экран выключен.</string>
+    <string name="accessibility_quick_settings_always_on_display_changed_on">Всегда включенный экран включен.</string>
+
+    <!-- CPUInfo tile -->
+    <string name="quick_settings_cpuinfo_label">Информация о CPU</string>
+    <string name="accessibility_quick_settings_cpuinfo_off">Информация о CPU выкл.</string>
+    <string name="accessibility_quick_settings_cpuinfo_on">Информация о CPU вкл.</string>
+    <string name="accessibility_quick_settings_cpuinfo_changed_off">Информация о CPU выключена</string>
+    <string name="accessibility_quick_settings_cpuinfo_changed_on">Информация о CPU включена</string>
+
+    <!-- OnTheGo Tile -->
+    <string name="quick_settings_onthego_label">Режим \"На ходу\"</string>
+    <string name="accessibility_quick_settings_onthego_off">Режим \"На ходу\" выкл</string>
+    <string name="accessibility_quick_settings_onthego_on">Режим \"На ходу\" вкл</string>
+    <string name="accessibility_quick_settings_onthego_changed_off">Режим \"На ходу\" выключен</string>
+    <string name="accessibility_quick_settings_onthego_changed_on">Режим \"На ходу\" включен</string>
+
+    <!-- Advanced restart -->
+    <string name="global_action_reboot">Перезагрузка</string>
+    <string name="global_action_reboot_system">Система</string>
+    <string name="global_action_reboot_progress">Перезагрузка\u2026</string>
+    <string name="global_action_reboot_recovery">Рекавери</string>
+    <string name="global_action_reboot_recovery_progress">Перезагрузка в рекавери\u2026</string>
+    <string name="global_action_reboot_bootloader">Загрузчик</string>
+    <string name="global_action_reboot_bootloader_progress">Перезагрузка в загрузчик\u2026</string>
+    <string name="global_action_reboot_fastboot">Fastbootd</string>
+    <string name="global_action_reboot_fastboot_progress">Перезагрузка в режим fastbootd\u2026</string>
+    <string name="global_action_settings">Настройки</string>
+    <string name="global_action_screenshot">Снимок экрана</string>
+    <string name="global_action_screenrecord">Запись экрана</string>
+    <string name="global_action_flashlight">Фонарик</string>
+    <string name="global_action_onthego">Режим \"На ходу\"</string>
+
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">Текущий</string>
+
+    <!-- On The Go -->
+    <string name="onthego_notif_ticker">Режим \"На ходу\" активирован</string>
+    <string name="onthego_notif_title">Режим \"На ходу\"  активер</string>
+    <string name="onthego_notif_stop">Стоп</string>
+    <string name="onthego_notif_options">Параметры</string>
+    <string name="onthego_notif_error">Невозможно запустить режим \"На ходу\"</string>
+    <string name="onthego_notif_restart">Перезагрузка режима \"На ходу\"</string>
+    <string name="onthego_notif_camera_changed">Режим камеры изменен</string>
+    <string name="onthego_transparency">Прозрачность</string>
+    <string name="onthego_front_camera">Использовать фронтальную камеру</string>
+    <string name="onthego_service_toggle">Автоматически перезапустить службу</string>
+    <string name="onthego_channel_name">Основной</string>
+
+    <!-- Advance location quick setting tile -->
+    <string name="quick_settings_location_secondary_battery_saving">Экономия заряда батареи</string>
+    <string name="accessibility_quick_settings_location_battery_saving">Отчетность о местоположении: режим экономии заряда батареи.</string>
+    <string name="quick_settings_location_secondary_gps_only">Только датчики</string>
+    <string name="accessibility_quick_settings_location_gps_only">Отчетность о местоположении: режим только датчиков.</string>
+    <string name="quick_settings_location_secondary_high_accuracy">Высокая точность</string>
+    <string name="accessibility_quick_settings_location_high_accuracy">Отчеты о местоположении: режим высокой точности.</string>
+
+
+    <!-- Label for area where tiles can be added to the qs panel -->
+    <string name="drag_or_tap_to_add_tiles">Удерживайте и перетащите или нажмите для добавления плиток</string>
+    <!-- Label for header of customize QS -->
+    <string name="drag_or_tap_to_rearrange_tiles">Удерживайте и перетащите, чтобы изменить порядок или нажмите для удаления</string>
+
+    <string name="lockscreen_default">По умолчанию</string>
+    <string name="lockscreen_hidden">Нету</string>    
+
+    <!-- Theme tile -->
+    <string name="system_theme_style_title">Стиль</string>
+    <string name="system_theme_style_auto">Автоматический</string>
+    <string name="system_theme_style_light">Светлая</string>
+    <string name="system_theme_style_dark">Google темная</string>
+    <string name="system_theme_style_pitchblack">Абсолютно черная</string>
+    <string name="system_theme_style_blue">Синий</string>
+    <string name="system_theme_style_charcoalblack">Угольно-черная</string>
+    <string name="system_theme_style_clear">Чистая</string>
+    <string name="system_theme_style_night">Ночь</string>
+    <string name="system_theme_style_flame">Пламя</string>
+    <string name="system_theme_style_nature">Природа</string>
+    <string name="system_theme_style_ocean">Океан</string>
+    <string name="quick_settings_theme_tile_title">Акцент</string>
+    <string name="quick_settings_theme_tile_accent_detail_title">Выбрать цвет</string>
+    <string name="quick_settings_theme_tile_style_detail_title">Выбрать стиль</string>
+    <string name="quick_settings_theme_tile_color_default">По умолчанию</string>
+    <string name="quick_settings_theme_tile_color_amethyst">Аметист</string>
+    <string name="quick_settings_theme_tile_color_aquamarine">Аквамарин</string>
+    <string name="quick_settings_theme_tile_color_carbon">Карбон</string>
+    <string name="quick_settings_theme_tile_color_palette">Палитра</string>
+    <string name="quick_settings_theme_tile_color_sand">Песок</string>
+    <string name="quick_settings_theme_tile_color_tangerine">Мандарин</string>
+    <string name="quick_settings_theme_tile_color_space">Космос</string>
+    <string name="quick_settings_theme_tile_color_purple">Фиолетовый</string>
+    <string name="quick_settings_theme_tile_color_orchid">Орхидея</string>
+    <string name="quick_settings_theme_tile_color_ocean">Океан</string>
+    <string name="quick_settings_theme_tile_color_green">Зеленый</string>
+    <string name="quick_settings_theme_tile_color_cinnamon">Корица</string>
+    <string name="quick_settings_theme_tile_color_amber">Янтарь</string>
+    <string name="quick_settings_theme_tile_color_blue">Синий</string>
+    <string name="quick_settings_theme_tile_color_bluegrey">Серо-голубой</string>
+    <string name="quick_settings_theme_tile_color_brown">Коричневый</string>
+    <string name="quick_settings_theme_tile_color_cyan">Голубой</string>
+    <string name="quick_settings_theme_tile_color_deeporange">Темно-Оранжевый</string>
+    <string name="quick_settings_theme_tile_color_deeppurple">Темно-Фиолетовый</string>
+    <string name="quick_settings_theme_tile_color_grey">Серый</string>
+    <string name="quick_settings_theme_tile_color_indigo">Индиго</string>
+    <string name="quick_settings_theme_tile_color_lightblue">Светло-синий</string>
+    <string name="quick_settings_theme_tile_color_lightgreen">Светло-зеленый</string>
+    <string name="quick_settings_theme_tile_color_lime">Лайм</string>
+    <string name="quick_settings_theme_tile_color_ohsoorange">О, так оранжевый</string>
+    <string name="quick_settings_theme_tile_color_orange">Апельсин</string>
+    <string name="quick_settings_theme_tile_color_pink">Розовый</string>
+    <string name="quick_settings_theme_tile_color_red">Красный</string>
+    <string name="quick_settings_theme_tile_color_teal">Бирюзовый</string>
+    <string name="quick_settings_theme_tile_color_yellow">Желтый</string>
+    <string name="quick_settings_theme_tile_color_black">Черный</string>
+    <string name="quick_settings_theme_tile_color_white">Белый</string>
+
+    <!-- Data usage info -->
+    <string name="usage_data">использовано сегодня</string>
+
+</resources>
