@@ -86,6 +86,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.EventLog;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Slog;
@@ -323,6 +324,13 @@ public final class DisplayManagerService extends SystemService {
     // Receives notifications about changes to Settings.
     private SettingsObserver mSettingsObserver;
 
+    // The synchronization root for the display dumpsys.
+    private final SyncRoot mSyncDump = new SyncRoot();
+
+    // Whether dump is inprogress or not.
+    @GuardedBy("mSyncDump")
+    private boolean mDumpInProgress;
+
     public DisplayManagerService(Context context) {
         this(context, new Injector());
     }
@@ -356,6 +364,7 @@ public final class DisplayManagerService extends SystemService {
         mWideColorSpace = colorSpaces[1];
 
         mSystemReady = false;
+        mDumpInProgress = false;
     }
 
     public void setupSchedulerPolicies() {
@@ -1697,6 +1706,14 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void dumpInternal(PrintWriter pw) {
+        synchronized (mSyncDump) {
+            if (mDumpInProgress) {
+                pw.println("One dump is in service already.");
+                return;
+            }
+            mDumpInProgress = true;
+        }
+
         pw.println("DISPLAY MANAGER (dumpsys display)");
 
         synchronized (mSyncRoot) {
@@ -1757,6 +1774,9 @@ public final class DisplayManagerService extends SystemService {
 
             pw.println();
             mPersistentDataStore.dump(pw);
+        }
+        synchronized (mSyncDump) {
+            mDumpInProgress = false;
         }
     }
 
@@ -2206,10 +2226,16 @@ public final class DisplayManagerService extends SystemService {
                 }
             }
 
-            if (callingUid == Process.SYSTEM_UID
-                    || checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
-                flags |= VIRTUAL_DISPLAY_FLAG_TRUSTED;
-            } else {
+            if (callingUid != Process.SYSTEM_UID && (flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) != 0) {
+                if (!checkCallingPermission(ADD_TRUSTED_DISPLAY, "createVirtualDisplay()")) {
+                    EventLog.writeEvent(0x534e4554, "162627132", callingUid,
+                            "Attempt to create a trusted display without holding permission!");
+                    throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
+                            + "create a trusted virtual display.");
+                }
+            }
+
+            if ((flags & VIRTUAL_DISPLAY_FLAG_TRUSTED) == 0) {
                 flags &= ~VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
             }
 
@@ -2563,8 +2589,7 @@ public final class DisplayManagerService extends SystemService {
         public boolean requestPowerState(DisplayPowerRequest request,
                 boolean waitForNegativeProximity) {
             synchronized (mSyncRoot) {
-                return mDisplayPowerController.requestPowerState(request,
-                        waitForNegativeProximity);
+                return mDisplayPowerController.requestPowerState(request, waitForNegativeProximity);
             }
         }
 
@@ -2692,6 +2717,10 @@ public final class DisplayManagerService extends SystemService {
             return getDisplayedContentSampleInternal(displayId, maxFrames, timestamp);
         }
 
+        @Override
+        public void ignoreProximitySensorUntilChanged() {
+            mDisplayPowerController.ignoreProximitySensorUntilChanged();
+        }
     }
 
     class DesiredDisplayModeSpecsObserver

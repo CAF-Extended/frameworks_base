@@ -205,7 +205,8 @@ public class ScreenshotNotificationsController {
         mPublicNotificationBuilder
                 .setContentTitle(mResources.getString(R.string.screenshot_saved_title))
                 .setContentText(mResources.getString(R.string.screenshot_saved_text))
-                .setContentIntent(PendingIntent.getActivity(mContext, 0, launchIntent, 0))
+                .setContentIntent(PendingIntent
+                        .getActivity(mContext, 0, launchIntent, PendingIntent.FLAG_IMMUTABLE))
                 .setWhen(now)
                 .setAutoCancel(true)
                 .setColor(mContext.getColor(
@@ -213,7 +214,8 @@ public class ScreenshotNotificationsController {
         mNotificationBuilder
                 .setContentTitle(mResources.getString(R.string.screenshot_saved_title))
                 .setContentText(mResources.getString(R.string.screenshot_saved_text))
-                .setContentIntent(PendingIntent.getActivity(mContext, 0, launchIntent, 0))
+                .setContentIntent(PendingIntent
+                        .getActivity(mContext, 0, launchIntent, PendingIntent.FLAG_IMMUTABLE))
                 .setWhen(now)
                 .setAutoCancel(true)
                 .setColor(mContext.getColor(
@@ -250,7 +252,7 @@ public class ScreenshotNotificationsController {
                 dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE);
         if (intent != null) {
             final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
-                    mContext, 0, intent, 0, null, UserHandle.CURRENT);
+                    mContext, 0, intent, PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
             b.setContentIntent(pendingIntent);
         }
 

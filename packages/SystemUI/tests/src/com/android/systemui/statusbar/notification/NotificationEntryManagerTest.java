@@ -61,6 +61,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -98,6 +99,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import dagger.Lazy;
+
 /**
  * Unit tests for {@link NotificationEntryManager}. This test will not test any interactions with
  * inflation. Instead, for functional inflation tests, see
@@ -126,6 +129,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     @Mock private LeakDetector mLeakDetector;
     @Mock private NotificationMediaManager mNotificationMediaManager;
     @Mock private NotificationRowBinder mNotificationRowBinder;
+    @Mock private Lazy<BubbleController> mBubbleControllerLazy;
 
     private int mId;
     private NotificationEntry mEntry;
@@ -200,6 +204,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 () -> mNotificationRowBinder,
                 () -> mRemoteInputManager,
                 mLeakDetector,
+                mBubbleControllerLazy,
                 mock(ForegroundServiceDismissalFeatureController.class)
         );
         mEntryManager.setUpWithPresenter(mPresenter);
@@ -374,6 +379,36 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mRow, never()).setEntry(eq(mEntry));
         assertEquals(1, mEntry.getSmartActions().size());
         assertEquals("action", mEntry.getSmartActions().get(0).title);
+    }
+
+    @Test
+    public void testUpdatePendingNotification_rankingUpdated() {
+        // GIVEN a notification with ranking is pending
+        final Ranking originalRanking = mEntry.getRanking();
+        mEntryManager.mPendingNotifications.put(mEntry.getKey(), mEntry);
+
+        // WHEN the same notification has been updated with a new ranking
+        final int newRank = 2345;
+        doAnswer(invocationOnMock -> {
+            Ranking ranking = (Ranking)
+                    invocationOnMock.getArguments()[1];
+            ranking.populate(
+                    mEntry.getKey(),
+                    newRank, /* this changed!! */
+                    false,
+                    0,
+                    0,
+                    IMPORTANCE_DEFAULT,
+                    null, null,
+                    null, null, null, true,
+                    Ranking.USER_SENTIMENT_NEUTRAL, false, -1,
+                    false, null, null, false, false, false, null, false);
+            return true;
+        }).when(mRankingMap).getRanking(eq(mEntry.getKey()), any(Ranking.class));
+        mEntryManager.addNotification(mSbn, mRankingMap);
+
+        // THEN ranking for the entry has been updated with new ranking
+        assertEquals(newRank, mEntry.getRanking().getRank());
     }
 
     @Test

@@ -92,6 +92,11 @@ import java.util.Set;
  * packages that are currently installed on the device.
  *
  * You can find this class through {@link Context#getPackageManager}.
+ *
+ * <p class="note"><strong>Note: </strong>If your app targets Android 11 (API level 30) or
+ * higher, the methods in this class each return a filtered list of apps. Learn more about how to
+ * <a href="/training/basics/intents/package-visibility">manage package visibility</a>.
+ * </p>
  */
 public abstract class PackageManager {
     private static final String TAG = "PackageManager";
@@ -1687,6 +1692,15 @@ public abstract class PackageManager {
      * because the packge is a shared library used by other installed packages.
      * {@hide} */
     public static final int DELETE_FAILED_USED_SHARED_LIBRARY = -6;
+
+    /**
+     * Deletion failed return code: this is passed to the
+     * {@link IPackageDeleteObserver} if the system failed to delete the package
+     * because there is an app pinned.
+     *
+     * @hide
+     */
+    public static final int DELETE_FAILED_APP_PINNED = -7;
 
     /**
      * Return code that is passed to the {@link IPackageMoveObserver} when the
@@ -7545,6 +7559,7 @@ public abstract class PackageManager {
             case DELETE_FAILED_OWNER_BLOCKED: return "DELETE_FAILED_OWNER_BLOCKED";
             case DELETE_FAILED_ABORTED: return "DELETE_FAILED_ABORTED";
             case DELETE_FAILED_USED_SHARED_LIBRARY: return "DELETE_FAILED_USED_SHARED_LIBRARY";
+            case DELETE_FAILED_APP_PINNED: return "DELETE_FAILED_APP_PINNED";
             default: return Integer.toString(status);
         }
     }
@@ -7559,6 +7574,7 @@ public abstract class PackageManager {
             case DELETE_FAILED_OWNER_BLOCKED: return PackageInstaller.STATUS_FAILURE_BLOCKED;
             case DELETE_FAILED_ABORTED: return PackageInstaller.STATUS_FAILURE_ABORTED;
             case DELETE_FAILED_USED_SHARED_LIBRARY: return PackageInstaller.STATUS_FAILURE_CONFLICT;
+            case DELETE_FAILED_APP_PINNED: return PackageInstaller.STATUS_FAILURE_BLOCKED;
             default: return PackageInstaller.STATUS_FAILURE;
         }
     }
@@ -8009,6 +8025,20 @@ public abstract class PackageManager {
     public Set<String> getMimeGroup(@NonNull String mimeGroup) {
         throw new UnsupportedOperationException(
                 "getMimeGroup not implemented in subclass");
+    }
+
+    /**
+     * Grants implicit visibility of the package that provides an authority to a querying UID.
+     *
+     * @throws SecurityException when called by a package other than the contacts provider
+     * @hide
+     */
+    public void grantImplicitAccess(int queryingUid, String visibleAuthority) {
+        try {
+            ActivityThread.getPackageManager().grantImplicitAccess(queryingUid, visibleAuthority);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     // Some of the flags don't affect the query result, but let's be conservative and cache

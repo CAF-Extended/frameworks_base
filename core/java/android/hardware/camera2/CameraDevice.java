@@ -235,7 +235,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see StreamConfigurationMap#getOutputFormats()
      * @see StreamConfigurationMap#getOutputSizes(int)
      * @see StreamConfigurationMap#getOutputSizes(Class)
-     * @deprecated Please use @{link
+     * @deprecated Please use {@link
      *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
      *      full set of configuration options available.
      */
@@ -254,7 +254,7 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * @see #createCaptureSession
      * @see OutputConfiguration
-     * @deprecated Please use @{link
+     * @deprecated Please use {@link
      *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
      *      full set of configuration options available.
      */
@@ -290,7 +290,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see StreamConfigurationMap#getOutputSizes
      * @see android.media.ImageWriter
      * @see android.media.ImageReader
-     * @deprecated Please use @{link
+     * @deprecated Please use {@link
      *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
      *      full set of configuration options available.
      */
@@ -307,7 +307,7 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * @see #createReprocessableCaptureSession
      * @see OutputConfiguration
-     * @deprecated Please use @{link
+     * @deprecated Please use {@link
      *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
      *      full set of configuration options available.
      */
@@ -345,7 +345,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see CameraCaptureSession#captureBurst
      * @see CameraCaptureSession#setRepeatingBurst
      * @see CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList
-     * @deprecated Please use @{link
+     * @deprecated Please use {@link
      *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
      *      full set of configuration options available.
      */
@@ -421,7 +421,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @see #createReprocessableCaptureSession
      * @see CameraCaptureSession
      * @see OutputConfiguration
-     * @deprecated Please use @{link
+     * @deprecated Please use {@link
      *      #createCaptureSession(android.hardware.camera2.params.SessionConfiguration)} for the
      *      full set of configuration options available.
      * @hide
@@ -687,6 +687,8 @@ public abstract class CameraDevice implements AutoCloseable {
      *<p>BACKWARD_COMPATIBLE devices capable of streaming concurrently with other devices as described by
      * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds} have the
      * following guaranteed streams (when streaming concurrently with other devices)</p>
+     * <p> Note: The sizes mentioned for these concurrent streams are the maximum sizes guaranteed
+     * to be supported. Sizes smaller than these, obtained by {@link StreamConfigurationMap#getOutputSizes} for a particular format, are supported as well. </p>
      *
      * <table>
      * <tr><th colspan="5">Concurrent stream guaranteed configurations</th></tr>
@@ -700,7 +702,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
-     * <p> Devices which are not backwards-compatible, support a mandatory single stream of size sVGA with image format {@code DEPTH16} during concurrent operation.
+     * <p> Devices which are not backwards-compatible, support a mandatory single stream of size sVGA with image format {@code DEPTH16} during concurrent operation. </p>
      *
      * <p> For guaranteed concurrent stream configurations:</p>
      * <p> sVGA refers to the camera device's maximum resolution for that format from {@link StreamConfigurationMap#getOutputSizes} or

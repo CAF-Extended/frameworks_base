@@ -224,10 +224,33 @@ import java.util.concurrent.atomic.AtomicBoolean;
             if (!addSpeakerphoneClient(cb, pid, on)) {
                 return false;
             }
+            if (on) {
+                // Cancel BT SCO ON request by this same client: speakerphone and BT SCO routes
+                // are mutually exclusive.
+                // See symmetrical operation for startBluetoothScoForClient_Sync().
+                mBtHelper.stopBluetoothScoForPid(pid);
+            }
             final boolean wasOn = isSpeakerphoneOn();
             updateSpeakerphoneOn(eventSource);
             return (wasOn != isSpeakerphoneOn());
         }
+    }
+
+    /**
+     * Turns speakerphone off for a given pid and update speakerphone state.
+     * @param pid
+     */
+    @GuardedBy("mDeviceStateLock")
+    private void setSpeakerphoneOffForPid(int pid) {
+        SpeakerphoneClient client = getSpeakerphoneClientForPid(pid);
+        if (client == null) {
+            return;
+        }
+        client.unregisterDeathRecipient();
+        mSpeakerphoneClients.remove(client);
+        final String eventSource = new StringBuilder("setSpeakerphoneOffForPid(")
+                .append(pid).append(")").toString();
+        updateSpeakerphoneOn(eventSource);
     }
 
     @GuardedBy("mDeviceStateLock")
@@ -318,7 +341,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 return true;
             }
             if (o instanceof BtDeviceConnectionInfo) {
-                return mDevice.equals(((BtDeviceConnectionInfo) o).mDevice);
+                return mDevice.equals(((BtDeviceConnectionInfo) o).mDevice) &&
+                       mProfile == (((BtDeviceConnectionInfo) o).mProfile);
             }
             return false;
         }
@@ -351,7 +375,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
             // when receiving a request to change the connection state of a device, this last
             // request is the source of truth, so cancel all previous requests that are already in
             // the handler
-            removeScheduledA2dpEvents(device);
+            removeScheduledA2dpEvents(device, profile);
 
             sendLMsgNoDelay(
                     state == BluetoothProfile.STATE_CONNECTED
@@ -363,14 +387,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     /** remove all previously scheduled connection and state change events for the given device */
     @GuardedBy("mDeviceStateLock")
-    private void removeScheduledA2dpEvents(@NonNull BluetoothDevice device) {
+    private void removeScheduledA2dpEvents(@NonNull BluetoothDevice device, int profile) {
         mBrokerHandler.removeEqualMessages(MSG_L_A2DP_DEVICE_CONFIG_CHANGE, device);
 
         final BtDeviceConnectionInfo connectionInfoToRemove = new BtDeviceConnectionInfo(device,
                 // the next parameters of the constructor will be ignored when finding the message
                 // to remove as the equality of the message's object is tested on the device itself
                 // (see BtDeviceConnectionInfo.equals() method override)
-                BluetoothProfile.STATE_CONNECTED, 0, false, -1);
+                BluetoothProfile.STATE_CONNECTED, profile, false, -1);
         mBrokerHandler.removeEqualMessages(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION,
                 connectionInfoToRemove);
         mBrokerHandler.removeEqualMessages(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION,
@@ -510,8 +534,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
         sendIIMsgNoDelay(MSG_II_SET_HEARING_AID_VOLUME, SENDMSG_REPLACE, index, streamType);
     }
 
-    /*package*/ void postSetModeOwnerPid(int pid) {
-        sendIMsgNoDelay(MSG_I_SET_MODE_OWNER_PID, SENDMSG_REPLACE, pid);
+    /*package*/ void postSetModeOwnerPid(int pid, int mode) {
+        sendIIMsgNoDelay(MSG_I_SET_MODE_OWNER_PID, SENDMSG_REPLACE, pid, mode);
     }
 
     /*package*/ void postBluetoothA2dpDeviceConfigChange(@NonNull BluetoothDevice device) {
@@ -522,6 +546,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
     /*package*/ void startBluetoothScoForClient_Sync(IBinder cb, int scoAudioMode,
                 @NonNull String eventSource) {
         synchronized (mDeviceStateLock) {
+            // Cancel speakerphone ON request by this same client: speakerphone and BT SCO routes
+            // are mutually exclusive.
+            // See symmetrical operation for setSpeakerphoneOn(true).
+            setSpeakerphoneOffForPid(Binder.getCallingPid());
             mBtHelper.startBluetoothScoForClient(cb, scoAudioMode, eventSource);
         }
     }
@@ -983,7 +1011,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
                         synchronized (mDeviceStateLock) {
                             if (mModeOwnerPid != msg.arg1) {
                                 mModeOwnerPid = msg.arg1;
-                                updateSpeakerphoneOn("setNewModeOwner");
+                                if (msg.arg2 != AudioSystem.MODE_RINGTONE) {
+                                    updateSpeakerphoneOn("setNewModeOwner");
+                                }
                                 if (mModeOwnerPid != 0) {
                                     mBtHelper.disconnectBluetoothSco(mModeOwnerPid);
                                 }
@@ -1431,6 +1461,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
             return true;
         }
         return false;
+    }
+
+    @GuardedBy("mDeviceStateLock")
+    private SpeakerphoneClient getSpeakerphoneClientForPid(int pid) {
+        for (SpeakerphoneClient cl : mSpeakerphoneClients) {
+            if (cl.getPid() == pid) {
+                return cl;
+            }
+        }
+        return null;
     }
 
     // List of clients requesting speakerPhone ON

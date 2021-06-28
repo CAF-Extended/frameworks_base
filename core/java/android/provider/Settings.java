@@ -7908,6 +7908,12 @@ public final class Settings {
         public static final String UI_NIGHT_MODE_OVERRIDE_ON = "ui_night_mode_override_on";
 
         /**
+         * The last computed night mode bool the last time the phone was on
+         * @hide
+         */
+        public static final String UI_NIGHT_MODE_LAST_COMPUTED = "ui_night_mode_last_computed";
+
+        /**
          * The current night mode that has been overridden to turn off by the system.  Owned
          * and controlled by UiModeManagerService.  Constants are as per
          * UiModeManager.
@@ -8969,6 +8975,13 @@ public final class Settings {
         public static final int ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW = 0x2;
 
         /**
+         * Whether the Adaptive connectivity option is enabled.
+         *
+         * @hide
+         */
+        public static final String ADAPTIVE_CONNECTIVITY_ENABLED = "adaptive_connectivity_enabled";
+
+        /**
          * Keys we no longer back up under the current schema, but want to continue to
          * process when restoring historical backup datasets.
          *
@@ -8982,6 +8995,22 @@ public final class Settings {
                 ENABLED_NOTIFICATION_ASSISTANT,
                 ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES
         };
+
+        /**
+         * How long Assistant handles have enabled in milliseconds.
+         *
+         * @hide
+         */
+        public static final String ASSIST_HANDLES_LEARNING_TIME_ELAPSED_MILLIS =
+                "reminder_exp_learning_time_elapsed";
+
+        /**
+         * How many times the Assistant has been triggered using the touch gesture.
+         *
+         * @hide
+         */
+        public static final String ASSIST_HANDLES_LEARNING_EVENT_COUNT =
+                "reminder_exp_learning_event_count";
 
         /**
          * These entries are considered common between the personal and the managed profile,
@@ -10781,17 +10810,6 @@ public final class Settings {
         * change the ringer mode. See AudioManager.
         */
        public static final String MODE_RINGER = "mode_ringer";
-
-        /**
-         * Specifies whether Enhanced Connectivity is enabled or not. This setting allows the
-         * Connectivity Thermal Power Manager to actively help the device to save power in 5G
-         * scenarios
-         * Type: int 1 is enabled, 0 is disabled
-         *
-         * @hide
-         */
-        public static final String ENHANCED_CONNECTIVITY_ENABLED =
-                "enhanced_connectivity_enable";
 
         /**
          * Overlay display devices setting.

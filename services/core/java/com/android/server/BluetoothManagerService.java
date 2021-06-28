@@ -95,7 +95,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
     private static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
-    private static final String BLUETOOTH_PRIVILEGED_PERM = android.Manifest.permission.BLUETOOTH_PRIVILEGED;
+    private static final String BLUETOOTH_PRIVILEGED =
+            android.Manifest.permission.BLUETOOTH_PRIVILEGED;
 
     private static final String SECURE_SETTINGS_BLUETOOTH_ADDR_VALID = "bluetooth_addr_valid";
     private static final String SECURE_SETTINGS_BLUETOOTH_ADDRESS = "bluetooth_address";
@@ -170,6 +171,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     private IBluetoothGatt mBluetoothGatt;
     private final ReentrantReadWriteLock mBluetoothLock = new ReentrantReadWriteLock();
     private boolean mBinding;
+    private int mBindingUserID;
     private boolean mUnbinding;
     private int mWaitForEnableRetry;
     private int mWaitForDisableRetry;
@@ -282,6 +284,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             };
 
     public boolean onFactoryReset() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PRIVILEGED,
+                "Need BLUETOOTH_PRIVILEGED permission");
+
         // Wait for stable state if bluetooth is temporary state.
         int state = getState();
         if (state == BluetoothAdapter.STATE_BLE_TURNING_ON
@@ -1301,9 +1306,11 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     @Override
     public boolean bindBluetoothProfileService(int bluetoothProfile,
             IBluetoothProfileServiceConnection proxy) {
-        if (isBluetoothAvailableForBinding() == false) {
-            Slog.w(TAG, "bindBluetoothProfileService:Trying to bind to profile: "
-                       + bluetoothProfile + ", while Bluetooth is disabled");
+        if (mState != BluetoothAdapter.STATE_ON) {
+            if (DBG) {
+                Slog.d(TAG, "Trying to bind to profile: " + bluetoothProfile
+                        + ", while Bluetooth was disabled");
+            }
             return false;
         }
         synchronized (mProfileServices) {
@@ -1469,7 +1476,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 mBluetoothLock.readLock().unlock();
             }
 
-            if (!mEnable || state != BluetoothAdapter.STATE_ON) {
+            if (state != BluetoothAdapter.STATE_ON) {
                 if (DBG) {
                     Slog.d(TAG, "Unable to bindService while Bluetooth is disabled");
                 }
@@ -1752,7 +1759,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
             }
 
             mContext.enforceCallingOrSelfPermission(
-                   BLUETOOTH_PRIVILEGED_PERM, "Need BLUETOOTH PRIVILEGED permission");
+                   BLUETOOTH_PRIVILEGED, "Need BLUETOOTH PRIVILEGED permission");
         }
         persistBluetoothSetting(BLUETOOTH_ON_BLUETOOTH);
 
@@ -1870,6 +1877,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                                 mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
                             } else {
                                 mBinding = true;
+                                mBindingUserID = ActivityManager.getCurrentUser();
+                                Slog.d(TAG, "Binding BT service. Current user: " + mBindingUserID);
                             }
                         } else if (mBluetooth != null) {
                             try {
@@ -2051,7 +2060,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         BluetoothAdapter.nameForState(mState) + " mEnableExternal = "
                         + mEnableExternal + " getServiceRestartMs()="
                         + getServiceRestartMs());
-                    if ((mState == BluetoothAdapter.STATE_BLE_ON) && isBleAppPresent()) {
+                    if ((mState == BluetoothAdapter.STATE_BLE_ON) && (isBleAppPresent() ||
+                                mWaitForEnableRetry > 0)) {
+                        Slog.d(TAG, "isBleAppPresent(): " + isBleAppPresent() +
+                                " mWaitForEnableRetry=" + mWaitForEnableRetry);
                         mWaitForEnableRetry = 0;
                         if (mEnableExternal || isBluetoothPersistedStateOnBluetooth()) {
                            try {
@@ -2363,6 +2375,16 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         mBluetoothLock.writeLock().unlock();
                     }
 
+                    // Make sure BT process exit completely
+                    int[] pids = Process.getPidsForCommands(
+                                     new String[]{ "com.android.bluetooth" });
+                    if (pids != null && pids.length > 0) {
+                        for(int pid : pids) {
+                            Slog.e(TAG, "Killing BT process with PID = " + pid);
+                            Process.killProcess(pid);
+                        }
+                    }
+
                     // log the unexpected crash
                     addCrashLog();
                     addActiveLog(BluetoothProtoEnums.ENABLE_DISABLE_REASON_CRASH,
@@ -2418,9 +2440,14 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     mBluetoothLock.writeLock().unlock();
                     // Ensure try BIND for one more time
                     if(!mTryBindOnBindTimeout) {
-                        Slog.e(TAG, " Trying to Bind again");
-                        mTryBindOnBindTimeout = true;
-                        handleEnable(mQuietEnable);
+                        int userID = ActivityManager.getCurrentUser();
+
+                        Slog.d(TAG, "Current user: " + userID);
+                        if (mBindingUserID == userID) {
+                            Slog.e(TAG, " Trying to Bind again");
+                            mTryBindOnBindTimeout = true;
+                            handleEnable(mQuietEnable);
+                        }
                     } else {
                         Slog.e(TAG, "Bind trails excedded");
                         mTryBindOnBindTimeout = false;
@@ -2588,6 +2615,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                     mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
                 } else {
                     mBinding = true;
+                    mBindingUserID = ActivityManager.getCurrentUser();
+                    Slog.d(TAG, "Binding BT service. Current user: " + mBindingUserID);
                 }
             } else if (mBluetooth != null) {
                 //Enable bluetooth

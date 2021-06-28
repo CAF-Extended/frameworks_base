@@ -99,6 +99,8 @@ public class DisplayRotation {
     private final int mCarDockRotation;
     private final int mDeskDockRotation;
     private final int mUndockedHdmiRotation;
+    private final int mForceLandscapeRotation;
+    private final boolean mSupportForceLandscapeMode;
     private final RotationAnimationPair mTmpRotationAnim = new RotationAnimationPair();
 
     private OrientationListener mOrientationListener;
@@ -264,6 +266,12 @@ public class DisplayRotation {
         mCarDockRotation = readRotation(R.integer.config_carDockRotation);
         mDeskDockRotation = readRotation(R.integer.config_deskDockRotation);
         mUndockedHdmiRotation = readRotation(R.integer.config_undockedHdmiRotation);
+        mForceLandscapeRotation = readRotation(R.integer.config_forceLandscapeRotation);
+        mSupportForceLandscapeMode =
+                mContext.getResources().getBoolean(R.bool.config_supportForceLandscapeMode);
+        if (mSupportForceLandscapeMode && mForceLandscapeRotation != -1) {
+            mRotation = mForceLandscapeRotation;
+        }
 
         if (isDefaultDisplay) {
             final Handler uiHandler = UiThread.getHandler();
@@ -391,10 +399,8 @@ public class DisplayRotation {
         // It's also not likely to rotate a TV screen.
         final boolean isTv = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
-        final boolean forceDesktopMode =
-                mService.mForceDesktopModeOnExternalDisplays && !isDefaultDisplay;
         mDefaultFixedToUserRotation =
-                (isCar || isTv || mService.mIsPc || forceDesktopMode)
+                (isCar || isTv || mService.mIsPc || mDisplayContent.forceDesktopMode())
                 // For debug purposes the next line turns this feature off with:
                 // $ adb shell setprop config.override_forced_orient true
                 // $ adb shell wm size reset
@@ -1196,6 +1202,8 @@ public class DisplayRotation {
         } else if (orientation == ActivityInfo.SCREEN_ORIENTATION_LOCKED) {
             // Application just wants to remain locked in the last rotation.
             preferredRotation = lastRotation;
+        } else if (mSupportForceLandscapeMode) {
+            preferredRotation = mForceLandscapeRotation;
         } else if (!mSupportAutoRotation) {
             // If we don't support auto-rotation then bail out here and ignore
             // the sensor and any rotation lock settings.

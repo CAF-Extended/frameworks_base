@@ -1685,7 +1685,7 @@
   <java-symbol type="bool" name="config_enableCarDockHomeLaunch" />
   <java-symbol type="bool" name="config_enableLockBeforeUnlockScreen" />
   <java-symbol type="bool" name="config_enableLockScreenRotation" />
-  <java-symbol type="bool" name="config_forceShowSystemBars" />
+  <java-symbol type="bool" name="config_remoteInsetsControllerControlsSystemBars" />
   <java-symbol type="bool" name="config_lidControlsScreenLock" />
   <java-symbol type="bool" name="config_lidControlsSleep" />
   <java-symbol type="bool" name="config_lockDayNightMode" />
@@ -1943,6 +1943,7 @@
   <java-symbol type="fraction" name="config_dimBehindFadeDuration" />
   <java-symbol type="dimen" name="default_minimal_size_resizable_task" />
   <java-symbol type="dimen" name="default_minimal_size_pip_resizable_task" />
+  <java-symbol type="dimen" name="overridable_minimal_size_pip_resizable_task" />
   <java-symbol type="dimen" name="task_height_of_minimized_mode" />
   <java-symbol type="fraction" name="config_screenAutoBrightnessDozeScaleFactor" />
   <java-symbol type="bool" name="config_allowPriorityVibrationsInLowPowerMode" />
@@ -4074,4 +4075,9 @@
   <java-symbol type="string" name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" />
 
   <java-symbol type="array" name="config_notificationMsgPkgsAllowedAsConvos" />
+
+  <java-symbol type="array" name="config_keep_warming_services" />
+
+  <java-symbol type="bool" name="config_supportForceLandscapeMode" />
+  <java-symbol type="integer" name="config_forceLandscapeRotation" />
 </resources>
