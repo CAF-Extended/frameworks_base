@@ -163,7 +163,6 @@ public final class ClockManager {
         addBuiltinClock(() -> new DividedLinesClockController(res, layoutInflater, colorExtractor));
         addBuiltinClock(() -> new FluidClockController(res, layoutInflater, colorExtractor));
         addBuiltinClock(() -> new IDEClockController(res, layoutInflater, colorExtractor, context));
-        addBuiltinClock(() -> new FluidClockController(res, layoutInflater, colorExtractor));
         addBuiltinClock(() -> new OPMinimalClockController(res, layoutInflater, colorExtractor));
         addBuiltinClock(() -> new OPNumbersClockController(res, layoutInflater, colorExtractor));
         addBuiltinClock(() -> new OPRomanClockController(res, layoutInflater, colorExtractor));
