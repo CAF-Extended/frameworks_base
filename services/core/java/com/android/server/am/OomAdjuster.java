@@ -1860,7 +1860,8 @@ public class OomAdjuster {
                 state.bumpAllowStartFgsState(PROCESS_STATE_FOREGROUND_SERVICE);
                 state.setAdjType("fg-service");
                 state.setCached(false);
-                schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
+                //schedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
+                schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to " + state.getAdjType() + ": "
                             + app + " ");
@@ -1871,7 +1872,8 @@ public class OomAdjuster {
                 procState = PROCESS_STATE_IMPORTANT_FOREGROUND;
                 state.setCached(false);
                 state.setAdjType("has-overlay-ui");
-                schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+                //schedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+                schedGroup = ProcessList.SCHED_GROUP_TOP_APP;
                 if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                     reportOomAdjMessageLocked(TAG_OOM_ADJ, "Raise to overlay ui: " + app);
                 }
