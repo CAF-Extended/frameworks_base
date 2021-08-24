@@ -23,6 +23,7 @@ import android.content.Context;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
@@ -228,6 +229,7 @@ public abstract class PlayerBase {
 
     private void updatePlayerVolume() {
         final float finalLeftVol, finalRightVol;
+       float baikalMultiplier = BaikalSettings.getVolumeScale(Process.myUid());        
         synchronized (mLock) {
             finalLeftVol = mVolMultiplier * mLeftVolume * mPanMultiplierL * baikalMultiplier;
             finalRightVol = mVolMultiplier * mRightVolume * mPanMultiplierR* baikalMultiplier;

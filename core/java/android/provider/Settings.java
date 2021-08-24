@@ -15681,8 +15681,6 @@ public final class Settings {
         @Readable        
         @SuppressLint("NoSettingsProvider")        
         public static final String BAIKALOS_GMS_IDLE_RESTRICTED = "baikalos_gms_idle_restricted";
-        @Readable        
-        @SuppressLint("NoSettingsProvider")   
 
         /**
          * This preference holds SBC option.

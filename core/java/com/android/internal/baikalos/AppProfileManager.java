@@ -271,6 +271,7 @@ public class AppProfileManager extends MessageHandler {
                 setActiveFrameRateLocked(-1);
                 Actions.sendBrightnessOverrideChanged(setBrightnessOverrideLocked(0));
                 setRotation(-1);
+                BaikalSettings.setKeepOn(false);                
             } else {
                 setActivePerfProfileLocked(profile.mPerfProfile);
                 setActiveThermProfileLocked(profile.mThermalProfile);
@@ -279,6 +280,7 @@ public class AppProfileManager extends MessageHandler {
                 else setReaderModeLocked(false);
                 Actions.sendBrightnessOverrideChanged(setBrightnessOverrideLocked(profile.mBrightness));
                 setRotation(profile.mRotation-1);
+                BaikalSettings.setKeepOn(profile.mKeepOn);                
             }
     }
 
