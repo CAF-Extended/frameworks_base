@@ -31,43 +31,55 @@ public class PixelPropsUtils {
     private static final Map<String, Object> propsToChange;
 
     private static final String[] packagesToChange = {
-            "com.google.android.ext.services",
+            "com.android.vending",
+            "com.breel.wallpapers20",
+            "com.google.android.configupdater",
+            "com.google.android.apps.customization.pixel",
+            "com.google.android.apps.fitness",
+            "com.google.android.apps.gcs",
+            "com.google.android.apps.maps",
+            "com.google.android.apps.messaging",
+            "com.google.android.apps.nexuslauncher",
             "com.google.android.apps.pixelmigrate",
+            "com.google.android.apps.recorder",
             "com.google.android.apps.safetyhub",
+            "com.google.android.apps.subscriptions.red",
+            "com.google.android.apps.tachyon",
+            "com.google.android.apps.turbo",
+            "com.google.android.apps.turboadapter",
+            "com.google.android.apps.wallpaper",
+            "com.google.android.apps.wallpaper.pixel",
+            "com.google.android.apps.wellbeing",
             "com.google.android.as",
             "com.google.android.dialer",
-            "com.google.intelligence.sense",
-            "com.android.vending",
-            "com.google.android.apps.gcs",
-            "com.google.android.apps.turbo",
-            "com.google.android.apps.wellbeing",
-            "com.google.android.configupdater",
+            "com.google.android.ext.services",
             "com.google.android.gms",
-            "com.google.android.googlequicksearchbox",
-            "com.google.android.settings.intelligence",
-            "com.google.android.setupwizard",
-            "com.google.android.apps.nexuslauncher",
+            "com.google.android.deskclock",
+            "com.google.android.apps.youtube.music",
+            "com.google.android.apps.podcasts",
+            "com.google.android.apps.tachyon",
+            "com.google.android.apps.nbu.files",
+            "com.google.android.android.contacts",
+            "com.google.android.android.apps.messaging",
+            "com.google.android.gms.location.history",
             "com.google.android.gsf",
-            "com.google.android.apps.wallpaper",
-            "com.google.android.onetimeinitializer",
-            "com.google.android.pixel.setupwizard",
-            "com.google.android.apps.messaging",
+            "com.google.android.inputmethod.latin",
+            "com.google.android.soundpicker",
+            "com.google.intelligence.sense",
+            "com.google.pixel.dynamicwallpapers",
+            "com.google.pixel.livewallpaper",
             "com.google.android.apps.photos",
-            "com.google.android.apps.maps"
+            "com.google.android.googlequicksearchbox"
     };
 
     static {
         propsToChange = new HashMap<>();
         propsToChange.put("BRAND", "google");
         propsToChange.put("MANUFACTURER", "Google");
-        propsToChange.put("DEVICE", "redfin");
-        propsToChange.put("PRODUCT", "redfin");
-        propsToChange.put("MODEL", "Pixel 5");
-        propsToChange.put("IS_DEBUGGABLE", false);
-        propsToChange.put("IS_ENG", false);
-        propsToChange.put("IS_USERDEBUG", false);
-        propsToChange.put("IS_USER", true);
-        propsToChange.put("TYPE", "user");
+        propsToChange.put("DEVICE", "raven");
+        propsToChange.put("PRODUCT", "raven");
+        propsToChange.put("MODEL", "Pixel 6 Pro");
+        propsToChange.put("FINGERPRINT", "google/raven/raven:12/SD1A.210817.015.A4/7697517:userdebug/dev-keys");
     }
 
     public static void setProps(String packageName) {
@@ -81,8 +93,9 @@ public class PixelPropsUtils {
             for (Map.Entry<String, Object> prop : propsToChange.entrySet()) {
                 String key = prop.getKey();
                 Object value = prop.getValue();
+                // Don't set model if gms
                 if (packageName.equals("com.google.android.gms") && key.equals("MODEL")){
-                    value = value + "\u200b";
+                    continue;
                 }
                 setPropValue(key, value);
             }
