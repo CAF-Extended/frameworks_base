@@ -70,7 +70,6 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.LatencyTracker;
-import com.android.keyguard.EmergencyButtonController;
 import com.android.keyguard.KeyguardClockSwitch;
 import com.android.keyguard.KeyguardClockSwitchController;
 import com.android.keyguard.KeyguardStatusView;
@@ -295,8 +294,6 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private QuickAccessWalletController mQuickAccessWalletController;
     @Mock
-    private EmergencyButtonController.Factory mEmergencyButtonControllerFactory;
-    @Mock
     private NotificationRemoteInputManager mNotificationRemoteInputManager;
     @Mock
     private RemoteInputController mRemoteInputController;
@@ -448,8 +445,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mSecureSettings,
                 mUnlockedScreenOffAnimationController,
                 mNotificationRemoteInputManager,
-                mControlsComponent,
-                mEmergencyButtonControllerFactory);
+                mControlsComponent);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 mNotificationShelfController);

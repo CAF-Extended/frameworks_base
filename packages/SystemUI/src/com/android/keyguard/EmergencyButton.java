@@ -18,6 +18,9 @@ package com.android.keyguard;
 
 import android.content.Context;
 import com.android.systemui.Dependency;
+import android.telephony.ServiceState;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -48,6 +51,8 @@ public class EmergencyButton extends Button {
     private LockPatternUtils mLockPatternUtils;
 
     private final boolean mEnableEmergencyCallWhileSimLocked;
+    private boolean mIsCellAvailable;
+    private ServiceState mServiceState;
 
     public EmergencyButton(Context context) {
         this(context, null);
@@ -111,8 +116,7 @@ public class EmergencyButton extends Button {
         return super.performLongClick();
     }
 
-    public void updateEmergencyCallButton(boolean isInCall, boolean isVoiceCapable,
-                                          boolean simLocked, boolean isEmergencyCapable) {
+    public void updateEmergencyCallButton(boolean isInCall, boolean isVoiceCapable, boolean simLocked) {
         boolean visible = false;
         if (isVoiceCapable) {
             // Emergency calling requires voice capability.
@@ -129,7 +133,7 @@ public class EmergencyButton extends Button {
                 }
 
                 if (mContext.getResources().getBoolean(R.bool.kg_hide_emgcy_btn_when_oos)) {
-                    visible = visible && isEmergencyCapable;
+                    visible = visible && isEmergencyCapable();
                 }
             }
         }
@@ -148,4 +152,10 @@ public class EmergencyButton extends Button {
         }
     }
 
+    private boolean isEmergencyCapable() {
+        KeyguardUpdateMonitor monitor = Dependency.get(KeyguardUpdateMonitor.class);
+        return (!monitor.isOOS()
+                || mIsCellAvailable
+                || (mServiceState !=null && mServiceState.isEmergencyOnly()));
+    }
 }
