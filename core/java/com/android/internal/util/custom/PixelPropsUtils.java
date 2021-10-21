@@ -79,7 +79,6 @@ public class PixelPropsUtils {
         propsToChange.put("DEVICE", "raven");
         propsToChange.put("PRODUCT", "raven");
         propsToChange.put("MODEL", "Pixel 6 Pro");
-        propsToChange.put("FINGERPRINT", "google/raven/raven:12/SD1A.210817.015.A4/7697517:userdebug/dev-keys");
     }
 
     public static void setProps(String packageName) {
