@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.util.settings.SecureSettings;
+import com.android.systemui.settings.CurrentUserTracker;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -107,6 +108,7 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     private DeviceProvisionedController mDeviceProvisionedController;
     private WallpaperColors mCurrentColors;
     private WallpaperManager mWallpaperManager;
+    private CurrentUserTracker mUserTrack;
     // If fabricated overlays were already created for the current theme.
     private boolean mNeedsOverlayCreation;
     // Dominant color extracted from wallpaper, NOT the color used on the overlay
@@ -288,7 +290,6 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
     public void start() {
         if (DEBUG) Log.d(TAG, "Start");
         final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
         filter.addAction(Intent.ACTION_WALLPAPER_CHANGED);
         mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, filter, mMainExecutor,
@@ -364,6 +365,15 @@ public class ThemeOverlayController extends SystemUI implements Dumpable {
                 }
             }
         });
+        
+        mUserTrack = new CurrentUserTracker(mBroadcastDispatcher) {
+            @Override
+            public void onUserSwitched(int newUserId) {
+                if (DEBUG) Log.d(TAG, "onUserSwitched");
+                updateThemeOverlays();
+            }
+        };
+        mUserTrack.startTracking();        
     }
 
     protected void reevaluateSystemTheme(boolean forceReload) {
