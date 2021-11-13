@@ -18,9 +18,9 @@
     <item android:id="@id/background"
           android:gravity="center_vertical|fill_horizontal">
         <shape android:shape="rectangle"
-               android:tint="?attr/colorProgressBackgroundNormal">
-            <corners android:radius="?attr/progressBarCornerRadius" />
-            <size android:height="@dimen/seekbar_track_background_height_material" />
+               android:tint="?attr/colorControlActivated">
+            <corners android:radius="12dp" />
+            <size android:height="25dp" />
             <solid android:color="@color/white_disabled_material" />
         </shape>
     </item>
@@ -32,10 +32,10 @@
                       android:drawable="@color/transparent" />
                 <item>
                     <shape android:shape="rectangle"
-                           android:tint="?attr/colorControlActivated">
-                        <corners android:radius="?attr/progressBarCornerRadius" />
-                        <size android:height="@dimen/seekbar_track_progress_height_material" />
-                        <solid android:color="@color/white_disabled_material" />
+                           android:tint="@null">
+                        <corners android:radius="12dp" />
+                        <size android:height="25dp" />
+                        <solid android:color="?attr/colorAccent" />
                     </shape>
                 </item>
             </selector>
@@ -49,10 +49,10 @@
                       android:drawable="@color/transparent" />
                 <item>
                     <shape android:shape="rectangle"
-                           android:tint="?attr/colorControlActivated">
-                        <corners android:radius="?attr/progressBarCornerRadius" />
-                        <size android:height="@dimen/seekbar_track_progress_height_material" />
-                        <solid android:color="@color/white" />
+                           android:tint="@null">
+                        <corners android:radius="12dp" />
+                        <size android:height="25dp" />
+                        <solid android:color="?attr/colorAccent" />
                     </shape>
                 </item>
             </selector>
