@@ -61,6 +61,7 @@ android_library {
         "res-product",
         "res-keyguard",
         "res",
+        "res-pixel",
     ],
     static_libs: [
         "WindowManager-Shell",
@@ -96,9 +97,10 @@ android_library {
         "jsr330",
         "lottie",
         "vendor.lineage.biometrics.fingerprint.inscreen-V1.0-java",
-        "tensorflowlite_java",
         "colorkt",
         "themelib",
+        "tensorflowlite_java",
+        "SystemUIGoogle-lib",
     ],
     manifest: "AndroidManifest.xml",
     defaults: [
@@ -223,6 +225,11 @@ android_app {
     jni_libs: ["libtensorflowlite_jni"],
     use_embedded_native_libs: true,
     resource_dirs: [],
+    asset_dirs: ["assets"],
+    aaptflags: [
+        "-0 .tflite",
+        "-0 .vocab",
+    ],
 
     platform_apis: true,
     system_ext_specific: true,
