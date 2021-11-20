@@ -101,6 +101,7 @@ import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
