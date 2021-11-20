@@ -2701,6 +2701,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         checkBarModes();
     }
+    
+    /** Returns whether the top activity is in fullscreen mode. */
+    public boolean inFullscreenMode() {
+        return result.mAppFullscreen;
+    }    
 
     private void dismissVolumeDialog() {
         if (mVolumeComponent != null) {
