@@ -98,7 +98,6 @@ import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.Interpolators;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.camera.CameraIntents;
-import com.android.systemui.ScreenDecorations;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.controls.dagger.ControlsComponent;
@@ -520,8 +519,6 @@ public class NotificationPanelViewController extends PanelViewController {
     private NotificationShadeDepthController mDepthController;
     private int mDisplayId;
 
-    private int mStatusBarHeight;
-
     /**
      * Cache the resource id of the theme to avoid unnecessary work in onThemeChanged.
      *
@@ -604,7 +601,6 @@ public class NotificationPanelViewController extends PanelViewController {
      * the keyguard is dismissed to show the status bar.
      */
     private boolean mDelayShowingKeyguardStatusBar;
-    private ScreenDecorations mScreenDecorations;
 
     private boolean mAnimatingQS;
 
@@ -868,7 +864,6 @@ public class NotificationPanelViewController extends PanelViewController {
             }
         });
 
-        mScreenDecorations = Dependency.get(ScreenDecorations.class);
         onFinishInflate();
     }
 
@@ -966,8 +961,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 R.dimen.notification_panel_min_side_margin);
         mIndicationBottomPadding = mResources.getDimensionPixelSize(
                 R.dimen.keyguard_indication_bottom_padding);
-        mStatusBarHeight = mResources.getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height_portrait);
         mShelfHeight = mResources.getDimensionPixelSize(R.dimen.notification_shelf_height);
         mDarkIconSize = mResources.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size_dark);
         int statusbarHeight = mResources.getDimensionPixelSize(
@@ -2237,13 +2230,6 @@ public class NotificationPanelViewController extends PanelViewController {
         } else if (height <= mQsMinExpansionHeight && mQsExpanded) {
             setQsExpanded(false);
         }
-        if (mKeyguardShowing) {
-            if (height > mStatusBarHeight) {
-                setTopCorners(false);
-            } else {
-                setTopCorners(true);
-            }
-        }
         mQsExpansionHeight = height;
         updateQsExpansion();
         requestScrollerTopPaddingUpdate(false /* animate */);
@@ -2871,13 +2857,6 @@ public class NotificationPanelViewController extends PanelViewController {
                     mQsMinExpansionHeight + t * (mQsMaxExpansionHeight - mQsMinExpansionHeight);
             setQsExpansion(targetHeight);
         }
-        if (!mKeyguardShowing) {
-            if (expandedHeight > mStatusBarHeight) {
-                setTopCorners(false);
-            } else {
-                setTopCorners(true);
-            }
-        }
         updateExpandedHeight(expandedHeight);
         updateHeader();
         updateNotificationTranslucency();
@@ -3074,12 +3053,6 @@ public class NotificationPanelViewController extends PanelViewController {
                 getExpandedFraction());
         float alpha = Math.min(expansionAlpha, 1 - computeQsExpansionFraction());
         mBigClockContainer.setAlpha(alpha);
-    }
-
-    private void setTopCorners(boolean enable) {
-        if (mScreenDecorations == null)
-            mScreenDecorations = Dependency.get(ScreenDecorations.class);
-    	mScreenDecorations.setTopCorners(enable);
     }
 
     @Override
