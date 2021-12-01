@@ -255,6 +255,7 @@ import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.startingsurface.SplashscreenContentDrawer;
 import com.android.wm.shell.startingsurface.StartingSurface;
+import com.google.android.systemui.ambientmusic.AmbientIndicationContainer;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -3762,6 +3763,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    private @Nullable PendingIntent getAmbientIntent() {
+        Intent intent = new Intent();
+        PendingIntent pendingIntent = (PendingIntent) intent.getParcelableExtra("com.google.android.ambientindication.extra.OPEN_INTENT");
+        return pendingIntent;
+        
+        }
+                        
     private void updateDozingState() {
         Trace.traceCounter(Trace.TRACE_TAG_APP, "dozing", mDozing ? 1 : 0);
         Trace.beginSection("StatusBar#updateDozingState");
@@ -3781,6 +3789,15 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mNotificationPanelViewController.setDozing(mDozing, animate, mWakeUpTouchLocation);
         updateQsExpansionEnabled();
+        CharSequence charSequence = mMediaManager.getNowPlayingTrack(); 
+        //Intent intent = getIntent();
+        PendingIntent pendingIntent = getAmbientIntent();        
+        if (mAmbientIndicationContainer != null) {
+            ((AmbientIndicationContainer)mAmbientIndicationContainer)
+                    .setAmbientMusic(charSequence, pendingIntent, 1, false);
+        } else {
+            Log.d("StatusBar", "setAmbientMusic -> AmbientIndicationContainer null");
+        }        
         Trace.endSection();
     }
 
