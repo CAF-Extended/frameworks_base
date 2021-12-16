@@ -105,6 +105,7 @@ android_library {
     defaults: [
        "framework-wifi-vendor-hide-access-defaults",
     ],
+    additional_manifests: ["SystemUIGoogle-Manifest.xml"],
     libs: [
         "android.car",
         "android.car.userlib",
