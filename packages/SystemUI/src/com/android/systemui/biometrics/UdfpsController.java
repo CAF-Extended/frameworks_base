@@ -79,9 +79,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -163,7 +161,6 @@ public class UdfpsController implements DozeReceiver, UdfpsHbmProvider {
     private boolean mOnFingerDown;
     private boolean mAttemptedToDismissKeyguard;
     private final int mUdfpsVendorCode;
-    private Set<Callback> mCallbacks = new HashSet<>();
 
     @VisibleForTesting
     public static final AudioAttributes VIBRATION_SONIFICATION_ATTRIBUTES =
@@ -895,20 +892,6 @@ public class UdfpsController implements DozeReceiver, UdfpsHbmProvider {
     }
 
     /**
-     * Add a callback for fingerUp and fingerDown events
-     */
-    public void addCallback(Callback cb) {
-        mCallbacks.add(cb);
-    }
-
-    /**
-     * Remove callback
-     */
-    public void removeCallback(Callback cb) {
-        mCallbacks.remove(cb);
-    }
-
-    /**
      * Cancel updfs scan affordances - ability to hide the HbmSurfaceView (white circle) before
      * user explicitly lifts their finger. Generally, this should be called whenever udfps fails
      * or errors.
@@ -962,10 +945,6 @@ public class UdfpsController implements DozeReceiver, UdfpsHbmProvider {
             mFingerprintManager.onUiReady(mSensorProps.sensorId);
             Trace.endAsyncSection("UdfpsController.e2e.startIllumination", 0);
         });
-
-        for (Callback cb : mCallbacks) {
-            cb.onFingerDown();
-        }
     }
 
     private void onFingerUp() {
@@ -978,9 +957,6 @@ public class UdfpsController implements DozeReceiver, UdfpsHbmProvider {
         }
         if (mOnFingerDown) {
             mFingerprintManager.onPointerUp(mSensorProps.sensorId);
-            for (Callback cb : mCallbacks) {
-                cb.onFingerUp();
-            }
         }
         mOnFingerDown = false;
         if (mView.isIlluminationRequested()) {
@@ -1000,21 +976,6 @@ public class UdfpsController implements DozeReceiver, UdfpsHbmProvider {
             mView.setOnHoverListener(null);
             mView.setOnTouchListener(mOnTouchListener);
         }
-    }
-
-    /**
-     * Callback for fingerUp and fingerDown events.
-     */
-    public interface Callback {
-        /**
-         * Called onFingerUp events. Will only be called if the finger was previously down.
-         */
-        void onFingerUp();
-
-        /**
-         * Called onFingerDown events.
-         */
-        void onFingerDown();
     }
 
     @Override
