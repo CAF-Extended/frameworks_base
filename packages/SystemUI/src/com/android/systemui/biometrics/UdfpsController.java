@@ -789,7 +789,6 @@ public class UdfpsController implements DozeReceiver, UdfpsHbmProvider {
                 UdfpsEnrollView enrollView = (UdfpsEnrollView) mInflater.inflate(
                         R.layout.udfps_enroll_view, null);
                 mView.addView(enrollView);
-                enrollView.updateSensorLocation(mSensorProps);
                 return new UdfpsEnrollViewController(
                         enrollView,
                         mServerRequest.mEnrollHelper,
