@@ -1160,9 +1160,6 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mStatusBarView.setPanel(mNotificationPanelViewController);
                     mStatusBarView.setScrimController(mScrimController);
                     mStatusBarView.setExpansionChangedListeners(mExpansionChangedListeners);
-                    for (ExpansionChangedListener listener : mExpansionChangedListeners) {
-                        sendInitialExpansionAmount(listener);
-                    }
 
                     // CollapsedStatusBarFragment re-inflated PhoneStatusBarView and both of
                     // mStatusBarView.mExpanded and mStatusBarView.mBouncerShowing are false.
@@ -5045,14 +5042,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void addExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
         mExpansionChangedListeners.add(listener);
-        sendInitialExpansionAmount(listener);
-    }
-
-    private void sendInitialExpansionAmount(ExpansionChangedListener expansionChangedListener) {
-        if (mStatusBarView != null) {
-            expansionChangedListener.onExpansionChanged(mStatusBarView.getExpansionFraction(),
-                    mStatusBarView.isExpanded());
-        }
     }
 
     public void removeExpansionChangedListener(@NonNull ExpansionChangedListener listener) {

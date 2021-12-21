@@ -245,11 +245,5 @@ public interface KeyguardStateController extends CallbackController<Callback> {
          * animation.
          */
         default void onKeyguardDismissAmountChanged() {}
-
-        /**
-         * Triggered when the notification panel is starting or has finished
-         * fading away on transition to an app.
-         */
-        default void onLaunchTransitionFadingAwayChanged() {}
     }
 }
