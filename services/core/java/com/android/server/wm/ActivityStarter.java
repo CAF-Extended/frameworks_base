@@ -207,7 +207,6 @@ class ActivityStarter {
     private IVoiceInteractor mVoiceInteractor;
 
     public BoostFramework mPerf = null;
-    private static boolean LAUNCH_BOOST = SystemProperties.getBoolean("persist.vendor.perf.launch.boost", true);    
 
     // Last activity record we attempted to start
     private ActivityRecord mLastStartActivityRecord;

@@ -278,8 +278,6 @@ public class OomAdjuster {
     public static int mPerfHandle = -1;
     public static int mCurRenderThreadTid = -1;
     public static boolean mIsTopAppRenderThreadBoostEnabled = false;
-    private static  boolean TOP_APP_RENDER = SystemProperties.getBoolean("persist.vendor.perf.topAppRenderThreadBoost.enable", true);
-    private static boolean BGT_ENABLE = SystemProperties.getBoolean("persist.vendor.perf.bgt.enable", false);
 
     private final int mNumSlots;
     private final ArrayList<ProcessRecord> mTmpProcessList = new ArrayList<ProcessRecord>();

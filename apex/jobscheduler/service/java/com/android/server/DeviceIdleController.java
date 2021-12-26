@@ -2930,16 +2930,6 @@ public class DeviceIdleController extends SystemService
         int appId = UserHandle.getAppId(uid);
         synchronized (this) {
             duration = Math.min(duration, mConstants.MAX_TEMP_APP_ALLOWLIST_DURATION_MS);
-            int callingAppId = UserHandle.getAppId(callingUid);
-            if( !com.android.internal.baikalos.Runtime.isGmsUid(callingAppId) ) {
-                if (callingAppId >= Process.FIRST_APPLICATION_UID) {
-                    if (!mPowerSaveWhitelistSystemAppIds.get(callingAppId)) {
-                        throw new SecurityException("Calling app " + UserHandle.formatUid(callingUid)
-                                + " is not on whitelist");
-                    }
-                }
-            }
-            duration = Math.min(duration, mConstants.MAX_TEMP_APP_ALLOWLIST_DURATION_MS);
             Pair<MutableLong, String> entry = mTempWhitelistAppIdEndTimes.get(appId);
             final boolean newEntry = entry == null;
             // Set the new end time

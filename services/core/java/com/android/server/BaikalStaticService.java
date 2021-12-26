@@ -25,7 +25,6 @@ import com.android.internal.baikalos.Sensors;
 import com.android.internal.baikalos.Runtime;
 import com.android.internal.baikalos.AppProfileManager;
 import com.android.internal.baikalos.DevProfileManager;
-
 import com.android.internal.baikalos.BaikalSettings;
 
 import android.util.Slog;

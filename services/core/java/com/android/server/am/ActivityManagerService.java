@@ -5585,7 +5585,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     int appRestrictedInBackgroundLOSP(int uid, String packageName, int packageTargetSdk) {
         // Apps that target O+ are always subject to background check
         if (packageTargetSdk >= Build.VERSION_CODES.O) {
-            if(UserHandle.isCore(uid)) {
+            if(UserHandle.isCore(uid) || isOnDeviceIdleAllowlistLOSP(uid, false)) {
                 if (DEBUG_BACKGROUND_CHECK) {
                     Slog.i(TAG, "App " + uid + "/" + packageName + " targets O+, whitelisted");
                 }
@@ -6327,6 +6327,7 @@ public class ActivityManagerService extends IActivityManager.Stub
              (BaikalSettings.getStaminaMode()/* ||
              (com.android.internal.baikalos.Runtime.isIdleMode() 
               && BaikalSettings.getExtremeIdleEnabled())*/ ) ) { 
+            if( isOnDeviceIdleAllowlistLOSP(uid,true) ) return false;              
             if( DefaultDialerManager.isDefaultOrSystemDialer(mContext,packageName) ) return false;
             Slog.i("BaikalActivityServiceStatic", "isBackgroundRestrictedNoCheck: restricted(1) uid=" + uid + " pkg=" + packageName);
             return true;
