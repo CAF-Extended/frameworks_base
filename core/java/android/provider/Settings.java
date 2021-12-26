@@ -15644,11 +15644,13 @@ public final class Settings {
          * @hide
          */
         public static final String BAIKALOS_GMS_RESTRICTED = "baikalos_gms_restricted";
+        @SuppressLint("NoSettingsProvider")
         public static final String BAIKALOS_GPS_RESTRICTED = "baikalos_gps_restricted";
+        @SuppressLint("NoSettingsProvider")        
         public static final String BAIKALOS_GMS_STAMINA_RESTRICTED = "baikalos_gms_stamina_restricted";
+        @SuppressLint("NoSettingsProvider")        
         public static final String BAIKALOS_GMS_IDLE_RESTRICTED = "baikalos_gms_idle_restricted";
-
-
+        
         /* End of BaikalOS Global settings */
 
 
@@ -16319,7 +16321,7 @@ public final class Settings {
          */
         @Readable
         public static final String SHOW_USB_TEMPERATURE_ALARM = "show_usb_temperature_alarm";
-
+        
         /**
          * Temperature at which the high temperature warning notification should be shown.
          * @hide

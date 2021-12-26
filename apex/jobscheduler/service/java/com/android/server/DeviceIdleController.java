@@ -29,6 +29,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -1281,24 +1282,18 @@ public class DeviceIdleController extends SystemService
          */
         public boolean USE_WINDOW_ALARMS = DEFAULT_USE_WINDOW_ALARMS;
 
-        private final ContentResolver mResolver;
         private boolean mSmallBatteryDevice;
 
-        public Constants(Handler handler, ContentResolver resolver) {
-            super(handler);
-            mResolver = resolver;
+        public Constants() {
             mSmallBatteryDevice = ActivityManager.isSmallBatteryDevice();
+            if (mSmallBatteryDevice) {
+                INACTIVE_TIMEOUT = DEFAULT_INACTIVE_TIMEOUT_SMALL_BATTERY;
+                IDLE_AFTER_INACTIVE_TIMEOUT = DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT_SMALL_BATTERY;
+            }            
             DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_DEVICE_IDLE,
                     JobSchedulerBackgroundThread.getExecutor(), this);
             // Load all the constants.
-            onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_DEVICE_IDLE));
-            mResolver.registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.BAIKALOS_AGGRESSIVE_IDLE),
-                    false, this);
-
-            mResolver.registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.BAIKALOS_EXTREME_IDLE),
-                    false, this);                    
+            onPropertiesChanged(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_DEVICE_IDLE));                 
         }
 
 

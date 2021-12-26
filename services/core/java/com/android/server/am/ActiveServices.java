@@ -758,7 +758,7 @@ public final class ActiveServices {
         }
 
 
-        if( mAm.getAppStartModeLocked(r.appInfo.uid, r.packageName,
+        if( mAm.getAppStartModeLOSP(r.appInfo.uid, r.packageName,
                     r.appInfo.targetSdkVersion, callingPid, false, true, true) == ActivityManager.APP_START_MODE_DISABLED ) {
             Slog.w(TAG, "Background start disabled: service "
                     + service + " to " + r.shortInstanceName
@@ -792,7 +792,7 @@ public final class ActiveServices {
                     forceSilentAbort = true;
                 }
             } else {
-            final int allowed = mAm.getAppStartModeLOSP(r.appInfo.uid, r.packageName,
+            allowed = mAm.getAppStartModeLOSP(r.appInfo.uid, r.packageName,
                     r.appInfo.targetSdkVersion, callingPid, false, false, forcedStandby);
             }
 

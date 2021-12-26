@@ -2577,7 +2577,7 @@ public final class ProcessList {
 
         if ((info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
             app.setPersistent(true);
-            app.maxAdj = ProcessList.PERSISTENT_PROC_ADJ;
+            app.mState.setMaxAdj(ProcessList.PERSISTENT_PROC_ADJ);
         }
 
 	    //final int appId = UserHandle.getAppId(app.uid);
@@ -2585,7 +2585,7 @@ public final class ProcessList {
         if( mService.mBaikalActivityService != null &&  mService.mBaikalActivityService.mAppSettings != null ) {
             AppProfile profile = mService.mBaikalActivityService.mAppSettings.getProfile(app.uid,info.packageName);
             if( profile != null && profile.mPinned ) {
-                app.maxAdj = ProcessList.PERSISTENT_PROC_ADJ;
+            app.mState.setMaxAdj(ProcessList.PERSISTENT_PROC_ADJ);
                 Slog.d(TAG, "baikal: setPersistent4("+ info.packageName + ")");
             }
         }

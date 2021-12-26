@@ -2058,7 +2058,6 @@ public class AlarmManagerService extends SystemService {
         final int callerProcState = mActivityManagerInternal.getUidProcessState(callingUid);
         removeLocked(operation, directReceiver, REMOVE_REASON_UNDEFINED);
         incrementAlarmCount(a.uid);
-  	    BaikalStaticService.processAlarmLocked(a,mPendingIdleUntil);        
         setImplLocked(a);
         MetricsHelper.pushAlarmScheduled(a, callerProcState);
     }

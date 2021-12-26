@@ -26,7 +26,6 @@ import com.android.internal.baikalos.Runtime;
 import com.android.internal.baikalos.AppProfileManager;
 import com.android.internal.baikalos.DevProfileManager;
 
-
 import com.android.internal.baikalos.BaikalSettings;
 
 import android.util.Slog;
@@ -187,94 +186,4 @@ public class BaikalStaticService {
         }
     }
 
-    public static boolean processAlarmLocked(AlarmManagerService.Alarm a, AlarmManagerService.Alarm pendingUntil) {
-
-        if ( a == pendingUntil ) {
-            if( DEBUG ) {
-                Slog.i(TAG,"DeviceIdleAlarm: unrestricted:" + a.statsTag + ":" + a.toString() + ", ws=" + a.workSource );
-            }
-            return false;
-        }
-
-        if( a.alarmClock != null ) return false;
-
-        if( !isEnergySaveMode() ) return false;
-
-        /*
-        if( a.statsTag.contains("WifiConnectivityManager Schedule Periodic Scan Timer") ) {  
-            final long now = SystemClock.elapsedRealtime();
-            if( (a.when - now)  < 60*60*1000 ) {
-                a.when = a.whenElapsed = a.maxWhenElapsed = a.origWhen = now + 60*60*1000;
-            } 
-            if( DEBUG ) {
-                Slog.i(TAG,"DeviceIdleAlarm: AdjustAlarm (unrestricted):" + a.statsTag + ":" + a.toString() + ", ws=" + a.workSource );
-            }
-            return true;
-        }*/
-
-        // a.statsTag.contains("WifiConnectivityManager Schedule Watchdog Timer") ||
-        // a.statsTag.contains("WifiConnectivityManager Schedule Periodic Scan Timer") ||
-        // a.statsTag.contains("WifiConnectivityManager Restart") ) {
-
-
-	    boolean block = false;
-
-        a.wakeup = a.type == AlarmManager.ELAPSED_REALTIME_WAKEUP
-                || a.type == AlarmManager.RTC_WAKEUP;
-
-        if ( ((a.flags&(AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED | 
-		       AlarmManager.FLAG_ALLOW_WHILE_IDLE | 
-		       AlarmManager.FLAG_WAKE_FROM_IDLE)) != 0 
-            || a.wakeup)) {
-
-	        if( a.uid < Process.FIRST_APPLICATION_UID  ) {
-        	    if( a.statsTag.contains("NETWORK_LINGER_COMPLETE") ||
-            	    a.statsTag.contains("WriteBufferAlarm") ||
-            	    a.statsTag.contains("WifiConnectivityManager") ) {
-            	    a.flags &= ~(AlarmManager.FLAG_WAKE_FROM_IDLE);
-            	    a.wakeup = false;
-                }  else if( a.statsTag.contains("*sync") ||
-            	    a.statsTag.contains("*job") || 
-                    a.statsTag.contains("com.android.server.NetworkTimeUpdateService.action.POLL") ||
-                    a.statsTag.contains("APPWIDGET_UPDATE") ) {
-                    block = true;
-                } 
-	        } else {
-        	    if( a.packageName.startsWith("com.google.android.gms") ) {
-            	    block = true;
-        	    } else if( a.statsTag.contains("org.altbeacon.beacon.startup.StartupBroadcastReceiver") ) {
-            	    block = true;
-                }
-		        if( (a.flags & AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED) == 0 ) {
-		            block = true;
-		        }
-            }
-        } 
-
-	    if( block ) {
-	        a.wakeup = false;
-            a.flags &= ~(AlarmManager.FLAG_WAKE_FROM_IDLE 
-                    | AlarmManager.FLAG_ALLOW_WHILE_IDLE
-                    | AlarmManager.FLAG_ALLOW_WHILE_IDLE_UNRESTRICTED);
-                Slog.i(TAG,"DeviceIdleAlarm: restricted:" + a.statsTag + ":" + a.toString() + ", ws=" + a.workSource );
-	    }
-
-	    if( !a.wakeup && (a.type == AlarmManager.ELAPSED_REALTIME_WAKEUP
-          || a.type == AlarmManager.RTC_WAKEUP ) ) {
-	        if( a.type == AlarmManager.ELAPSED_REALTIME_WAKEUP ) a.type = AlarmManager.ELAPSED_REALTIME;
-	        else a.type = AlarmManager.RTC;
-            a.wakeup = false;
-            if( DEBUG ) {
-                Slog.i(TAG,"DeviceIdleAlarm: blocked:" + a.statsTag + ":" + a.toString() + ", ws=" + a.workSource );
-            }
-
-	    }
-
-        if( a.wakeup ) {
-            if( DEBUG ) {
-                Slog.i(TAG,"DeviceIdleAlarm: unrestricted:" + a.statsTag + ":" + a.toString() + ", ws=" + a.workSource );
-            }
-        }
-	    return block;
-   }
 }

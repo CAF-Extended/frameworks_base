@@ -229,7 +229,7 @@ public final class DeviceIdleJobsController extends StateController {
             isWhitelistedLocked(jobStatus) ) {
             mAllowInIdleJobs.remove(jobStatus);
         }
-         updateTaskStateLocked(jobStatus);       
+        updateTaskStateLocked(jobStatus, sElapsedRealtimeClock.millis());   
     }
 
     @Override

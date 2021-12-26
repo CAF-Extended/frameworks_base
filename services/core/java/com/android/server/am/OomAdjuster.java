@@ -1213,7 +1213,7 @@ public class OomAdjuster {
             final long oldTime, final ActiveUids activeUids) {
         ArrayList<ProcessRecord> lruList = mProcessList.getLruProcessesLOSP();
         final int numLru = lruList.size();
-        final ProcessRecord TOP_APP = mService.getTopAppLocked();
+        final ProcessRecord TOP_APP = mService.getTopApp();
 
         final int emptyProcessLimit = mConstants.CUR_MAX_EMPTY_PROCESSES;
         final int cachedProcessLimit = mConstants.CUR_MAX_CACHED_PROCESSES
@@ -1272,7 +1272,7 @@ public class OomAdjuster {
                 } else {
                     baikalAdj = BaikalActivityServiceStatic.applyOomAdjLocked(mService,app,TOP_APP);
                     if( baikalAdj == 2 ) {
-                        app.kill("by baikalos service",ApplicationExitInfo.REASON_OTHER,
+                        app.killLocked("by baikalos service",ApplicationExitInfo.REASON_OTHER,
                            ApplicationExitInfo.SUBREASON_ISOLATED_NOT_NEEDED, true);
                         continue;
                     } 

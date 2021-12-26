@@ -1739,15 +1739,11 @@ class ActivityStarter {
             final Task taskToAffiliate = (mLaunchTaskBehind && mSourceRecord != null)
                     ? mSourceRecord.getTask() : null;
             String packageName= mService.mContext.getPackageName();
-<<<<<<< HEAD
             if (mPerf != null) {
                 if (mStartActivity.perfActivityBoostHandler > 0) {
                    Slog.i(TAG, "Activity boosted, release it firstly");
                    mPerf.perfLockReleaseHandler(mStartActivity.perfActivityBoostHandler);
                 }
-=======
-            if (mPerf != null && LAUNCH_BOOST) {
->>>>>>> b0c3b8faa40a... Bringup BaikalOS internals,App profiles and Powesave Settings
                 mStartActivity.perfActivityBoostHandler =
                     mPerf.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
                                         packageName, -1, BoostFramework.Launch.BOOST_V1);
@@ -2722,15 +2718,11 @@ class ActivityStarter {
 
     private void addOrReparentStartingActivity(Task parent, String reason) {
         String packageName= mService.mContext.getPackageName();
-<<<<<<< HEAD
         if (mPerf != null) {
             if (mStartActivity.perfActivityBoostHandler > 0) {
                 Slog.i(TAG, "Activity boosted, release it firstly");
                 mPerf.perfLockReleaseHandler(mStartActivity.perfActivityBoostHandler);
             }
-=======
-        if (mPerf != null && LAUNCH_BOOST) {
->>>>>>> b0c3b8faa40a... Bringup BaikalOS internals,App profiles and Powesave Settings
             mStartActivity.perfActivityBoostHandler =
                 mPerf.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
                                     packageName, -1, BoostFramework.Launch.BOOST_V1);
