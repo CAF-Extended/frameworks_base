@@ -849,8 +849,7 @@ public final class ActiveServices {
                     + " forcedStandby=" + forcedStandby
                     + " r.startRequested=" + r.startRequested
                     + " startFg=" + fgRequired);
-         }
-	    }        
+         }       
 
         // At this point we've applied allowed-to-start policy based on whether this was
         // an ordinary startService() or a startForegroundService().  Now, only require that

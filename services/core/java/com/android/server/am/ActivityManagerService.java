@@ -6462,7 +6462,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if( !info.packageName.equals("com.motorola.faceunlock") &&
                 !info.packageName.equals("com.asus.stitchimage") ) {
                 app.setPersistent(true);
-                app.maxAdj = ProcessList.PERSISTENT_PROC_ADJ;
+           app.mState.setMaxAdj(ProcessList.PERSISTENT_PROC_ADJ);
                 Slog.d(TAG, "baikal: setPersistent1("+ info.packageName + ")");
             }
         }
