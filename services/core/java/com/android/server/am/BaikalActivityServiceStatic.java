@@ -99,7 +99,7 @@ public class BaikalActivityServiceStatic {
 
         if( DEBUG ) {
             /*Slog.d(TAG,"applyOomAdjLocked:" + 
-		        app.info.packageName + "/" + app.info.uid +
+		        app.info.packageName + "/" + appUid +
     		    ",ag=" + BaikalSettings.getAggressiveIdleEnabled() +
     		    ",ex=" + BaikalSettings.getExtremeIdleActive() + 
     		    ",id=" + Runtime.isIdleMode()
@@ -108,31 +108,31 @@ public class BaikalActivityServiceStatic {
 
 	    if( app == top_app ) return 0;
 
-        if( BaikalSettings.getTopAppUid() == app.info.uid ) return 0;
+        if( BaikalSettings.getTopAppUid() == appUid ) return 0;
 
         if( !BaikalSettings.getStaminaMode() &&
             !BaikalSettings.getExtremeIdleEnabled() &&
             !BaikalSettings.getAggressiveIdleEnabled() ) {
-            if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: Not in energy saving mode " + app.info.packageName + "/" + app.info.uid);
+            if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: Not in energy saving mode " + app.info.packageName + "/" + appUid);
             return 0;
         }
 
-        if( BaikalUtils.isGmsUid(app.info.uid)  ) {
+        if( BaikalUtils.isGmsUid(appUid)  ) {
 
             AppProfile cur_profile = AppProfileManager.getCurrentProfile();
             if( cur_profile != null && cur_profile.mRequireGms ) {
-                Slog.i(TAG,"applyOomAdjLocked: require GMS app: " + app.info.packageName + "/" + app.info.uid);
+                Slog.i(TAG,"applyOomAdjLocked: require GMS app: " + app.info.packageName + "/" + appUid);
                 return 0;
             } else {
-                if( BaikalSettings.getAppBlocked(app.info.uid, app.info.packageName) ) {
-                    Slog.i(TAG,"applyOomAdjLocked: killing blocked GMS app: " + app.info.packageName + "/" + app.info.uid);
+                if( BaikalSettings.getAppBlocked(appUid, app.info.packageName) ) {
+                    Slog.i(TAG,"applyOomAdjLocked: killing blocked GMS app: " + app.info.packageName + "/" + appUid);
                     killApp(app);
                     return 2;
                 }
             }
         }
 
-        final int appId = UserHandle.getAppId(app.info.uid);
+        final int appId = UserHandle.getAppId(appUid);
 
         if( BaikalSettings.getStaminaMode() )  {
             if(app.mState.getCurAdj() <= 50 ) return 0;
@@ -154,7 +154,7 @@ public class BaikalActivityServiceStatic {
 
         if( profile != null && profile.mPinned ) return 1;
         if( profile != null && profile.mBackground < 0 && app.mState.getCurAdj() < ProcessList.CACHED_APP_MIN_ADJ ) return 0;
-        if( profile == null && app.info.uid < Process.FIRST_APPLICATION_UID && app.mState.getCurAdj() < ProcessList.CACHED_APP_MIN_ADJ) return 0;
+        if( profile == null && appUid < Process.FIRST_APPLICATION_UID && app.mState.getCurAdj() < ProcessList.CACHED_APP_MIN_ADJ) return 0;
 
         switch (app.mState.getCurProcState()) {
             //PROCESS_STATE_PERSISTENT_UI:
@@ -168,8 +168,8 @@ public class BaikalActivityServiceStatic {
             case ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND:
 
             if( BaikalSettings.getStaminaMode() ) { 
-                if( BaikalSettings.getAppBlocked(app.info.uid, app.info.packageName) && (app.lastTopTime < oldTimeStamina) ) {
-                    Slog.i(TAG,"applyOomAdjLocked: IMP killing blocked app: " + app.info.packageName + "/" + app.info.uid);
+                if( BaikalSettings.getAppBlocked(appUid, app.info.packageName) && (app.lastTopTime < oldTimeStamina) ) {
+                    Slog.i(TAG,"applyOomAdjLocked: IMP killing blocked app: " + app.info.packageName + "/" + appUid);
                     killApp(app);
                     return 2;
                 }
@@ -190,14 +190,14 @@ public class BaikalActivityServiceStatic {
             case ActivityManager.PROCESS_STATE_HEAVY_WEIGHT:
             case ActivityManager.PROCESS_STATE_LAST_ACTIVITY:
 
-                if( BaikalSettings.getAppBlocked(app.info.uid, app.info.packageName) && (app.lastTopTime < oldTimeStamina) ) {
-                    Slog.i(TAG,"applyOomAdjLocked: killing blocked app: " + app.info.packageName + "/" + app.info.uid);
+                if( BaikalSettings.getAppBlocked(appUid, app.info.packageName) && (app.lastTopTime < oldTimeStamina) ) {
+                    Slog.i(TAG,"applyOomAdjLocked: killing blocked app: " + app.info.packageName + "/" + appUid);
                     killApp(app);
                     return 2;
                 }
 
                 if( BaikalSettings.getAppRestricted(appId,app.info.packageName) && (app.lastTopTime < oldTimeStamina) ) {
-                    Slog.i(TAG,"applyOomAdjLocked: killing restricted app: " + app.info.packageName + "/" + app.info.uid);
+                    Slog.i(TAG,"applyOomAdjLocked: killing restricted app: " + app.info.packageName + "/" + appUid);
                     killApp(app);
                     return 2;
                 }
@@ -205,11 +205,11 @@ public class BaikalActivityServiceStatic {
                 //if( !BaikalSettings.getExtremeIdleActive() && profile != null && profile.mBackground < 1 ) return 0;
 
                 if( app.lastProviderTime > 0 && app.lastProviderTime < oldTimeProvider ) {
-                    if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: BFGS stamina: active provider " + app.info.packageName + "/" + app.info.uid);
+                    if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: BFGS stamina: active provider " + app.info.packageName + "/" + appUid);
                     return 0;
                 }
         
-                //if( app.info.uid < Process.FIRST_APPLICATION_UID &&  app.curAdj < (ProcessList.CACHED_APP_MIN_ADJ) ) return 0;
+                //if( appUid < Process.FIRST_APPLICATION_UID &&  app.curAdj < (ProcessList.CACHED_APP_MIN_ADJ) ) return 0;
  
                 if( BaikalSettings.getStaminaMode() || 
                     BaikalSettings.getExtremeIdleActive() ){
@@ -232,7 +232,7 @@ public class BaikalActivityServiceStatic {
                                 if (client == app) {
                                     continue;
                                 } else {
-                                    if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: BFGS stamina: connected provider " + app.info.packageName + "/" + app.info.uid);
+                                    if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: BFGS stamina: connected provider " + app.info.packageName + "/" + appUid);
                                     return 0;
                                 }
                             }
@@ -244,48 +244,48 @@ public class BaikalActivityServiceStatic {
 
                 if( (!BaikalSettings.getExtremeIdleActive() && !BaikalSettings.getStaminaMode()) ||app.mState.getCurAdj() < (ProcessList.CACHED_APP_MIN_ADJ) ) {
                     if( !BaikalSettings.getAppRestricted(appId,app.info.packageName) && Arrays.binarySearch(mAm.mDeviceIdleAllowlist, appId) >= 0 ) {
-                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: BFGS stamina: sys wl " + app.info.packageName + "/" + app.info.uid);
+                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: BFGS stamina: sys wl " + app.info.packageName + "/" + appUid);
                         return 0;
                     }
                     if( (Arrays.binarySearch(mAm.mDeviceIdleTempAllowlist, appId) >= 0)
-                        || (mAm.mPendingTempAllowlist.indexOfKey(app.info.uid) >= 0)  )  {
-                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: BFGS stamina: temp wl " + app.info.packageName + "/" + app.info.uid);
+                        || (mAm.mPendingTempAllowlist.indexOfKey(appUid) >= 0)  )  {
+                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: BFGS stamina: temp wl " + app.info.packageName + "/" + appUid);
                         return 1;
                     }
                 }
 
                 if( (app.mLastActivityTime > activeTime) && app.curAdj < (ProcessList.CACHED_APP_MIN_ADJ + 40) ) {
-                    if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM app is active " + app.info.packageName + "/" + app.info.uid);
+                    if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM app is active " + app.info.packageName + "/" + appUid);
                     return 0;
                 }
 
                 if ( profile != null && profile.mBackground > 0 && (app.mLastActivityTime < oldTimeStamina) ) {
-                    Slog.i(TAG,"applyOomAdjLocked: BFGS stamina: restricted " + app.info.packageName + "/" + app.info.uid);
+                    Slog.i(TAG,"applyOomAdjLocked: BFGS stamina: restricted " + app.info.packageName + "/" + appUid);
                 } else if ( BaikalSettings.getStaminaMode() ) {
                     if( (app.mLastActivityTime > oldTimeStamina) && app.mState.getCurAdj() < (ProcessList.CACHED_APP_MIN_ADJ + 10) ) {
-                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM stamina: active " + app.info.packageName + "/" + app.info.uid);
+                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM stamina: active " + app.info.packageName + "/" + appUid);
                         return 0;
                     }
                 } else if( BaikalSettings.getExtremeIdleActive() ) {
                     if( (app.mLastActivityTime > oldTime) && app.mState.getCurAdj() < (ProcessList.CACHED_APP_MIN_ADJ + 10) ) {
-                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM idle extreme: low adjustment " + app.info.packageName + "/" + app.info.uid);
+                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM idle extreme: low adjustment " + app.info.packageName + "/" + appUid);
                         return 0;
                     }
                 } else if( BaikalSettings.getExtremeIdleEnabled() ) {
                     if( (app.mLastActivityTime > oldTime) && app.mState.getCurAdj() < (ProcessList.CACHED_APP_MIN_ADJ + 30) ) {
-                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM stamina: active " + app.info.packageName + "/" + app.info.uid);
+                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM stamina: active " + app.info.packageName + "/" + appUid);
                         return 0;
                     }
                 } else if( BaikalSettings.getAggressiveIdleEnabled() ) {
                     if( (app.mLastActivityTime > oldTime ) && app.mState.getCurAdj() < (ProcessList.CACHED_APP_MIN_ADJ + 30) ) {
-                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM extreme: active " + app.info.packageName + "/" + app.info.uid);
+                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM extreme: active " + app.info.packageName + "/" + appUid);
                         return 0;
                     }
                 } else {
                     return 0;
                 }
 
-                /*if( DEBUG )*/ Slog.i(TAG,"applyOomAdjLocked: killing active app: " + app.info.packageName + "/" + app.info.uid);
+                /*if( DEBUG )*/ Slog.i(TAG,"applyOomAdjLocked: killing active app: " + app.info.packageName + "/" + appUid);
 
                 killApp(app);
                 return 2;
@@ -302,7 +302,7 @@ public class BaikalActivityServiceStatic {
                                 if (client == app) {
                                     continue;
                                 } else {
-                                    if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: BFGS stamina: connected provider " + app.info.packageName + "/" + app.info.uid);
+                                    if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: BFGS stamina: connected provider " + app.info.packageName + "/" + appUid);
                                     return 0;
                                 }
                             }
@@ -314,14 +314,14 @@ public class BaikalActivityServiceStatic {
 
             case ActivityManager.PROCESS_STATE_CACHED_EMPTY: {
 
-                if( BaikalSettings.getAppBlocked(app.info.uid, app.info.packageName) && (app.lastTopTime < oldTimeStamina) ) {
-                    Slog.i(TAG,"applyOomAdjLocked: killing blocked cached app: " + app.info.packageName + "/" + app.info.uid);
+                if( BaikalSettings.getAppBlocked(appUid, app.info.packageName) && (app.lastTopTime < oldTimeStamina) ) {
+                    Slog.i(TAG,"applyOomAdjLocked: killing blocked cached app: " + app.info.packageName + "/" + appUid);
                     killApp(app);
                     return 2;
                 }
 
                 if( BaikalSettings.getAppRestricted(appId,app.info.packageName) && (app.lastTopTime < oldTimeStamina) ) {
-                    Slog.i(TAG,"applyOomAdjLocked: killing restricted cached app: " + app.info.packageName + "/" + app.info.uid);
+                    Slog.i(TAG,"applyOomAdjLocked: killing restricted cached app: " + app.info.packageName + "/" + appUid);
                     killApp(app);
                     return 2;
                 }
@@ -329,35 +329,35 @@ public class BaikalActivityServiceStatic {
 
                 if ( BaikalSettings.getStaminaMode() ) {
                     if( (app.mLastActivityTime > oldTimeStamina) && app.mState.getCurAdj() < (ProcessList.CACHED_APP_MIN_ADJ) ) {
-                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM stamina: active " + app.info.packageName + "/" + app.info.uid);
+                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM stamina: active " + app.info.packageName + "/" + appUid);
                         return 0;
                     }
                 } else if( BaikalSettings.getExtremeIdleActive() ) {
                     if( (app.mLastActivityTime > oldTime) 
                             && app.mState.getCurAdj() < (ProcessList.CACHED_APP_MIN_ADJ + 10 ) 
                             && app.mState.getCurProcState() != ActivityManager.PROCESS_STATE_CACHED_RECENT ) {
-                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM idle extreme: active " + app.info.packageName + "/" + app.info.uid);
+                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM idle extreme: active " + app.info.packageName + "/" + appUid);
                         return 0;
                     }
                 } else if( BaikalSettings.getExtremeIdleEnabled() ) {
                     if( (app.mLastActivityTime > oldTime) 
                         && app.mState.getCurAdj() < (ProcessList.CACHED_APP_MIN_ADJ + 30) 
                         && app.mState.getCurProcState() != ActivityManager.PROCESS_STATE_CACHED_RECENT ) {
-                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM extreme: active " + app.info.packageName + "/" + app.info.uid);
+                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM extreme: active " + app.info.packageName + "/" + appUid);
                         return 0;
                     }
                 } else if( BaikalSettings.getAggressiveIdleEnabled() ) {
                     if( (app.mLastActivityTime > oldTime ) && app.mState.getCurAdj() < (ProcessList.CACHED_APP_MIN_ADJ + 30) ) {
-                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM aggressive: active " + app.info.packageName + "/" + app.info.uid);
+                        if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: CEM aggressive: active " + app.info.packageName + "/" + appUid);
                         return 0;
                     }
                 } else {
-                    if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: Not in energy saving mode " + app.info.packageName + "/" + app.info.uid);
+                    if( DEBUG_STAMINA ) Slog.i(TAG,"applyOomAdjLocked: Not in energy saving mode " + app.info.packageName + "/" + appUid);
                     return 0;
                 }
 
 
-                /*if( DEBUG ) */ Slog.i(TAG,"applyOomAdjLocked: killing cached app: " + app.info.packageName + "/" + app.info.uid);
+                /*if( DEBUG ) */ Slog.i(TAG,"applyOomAdjLocked: killing cached app: " + app.info.packageName + "/" + appUid);
                 killApp(app);
                 return 2;
              }
@@ -460,11 +460,8 @@ public class BaikalActivityServiceStatic {
         AppProfile cur_profile = AppProfileManager.getCurrentProfile();
         if( cur_profile != null && cur_profile.mRequireGms ) return false;
 
-        if( service.name.getClassName().startsWith("com.google.firebase") ) return true;
+        //if( service.name.getClassName().startsWith("com.google.firebase") ) return true;
         if( service.name.getClassName().startsWith("com.google.android.gms.ads") ) return true;
-        if( service.name.getClassName().startsWith("com.google.android.gms.feedback") ) return true;
-        if( service.name.getClassName().startsWith("com.google.android.gms.measurement") ) return true;
-        if( service.name.getClassName().startsWith("com.google.android.gms.crash") ) return true;
         //if( service.name.getClassName().startsWith("com.google.android.gms.nearby") ) return true;
         //if( service.name.getClassName().startsWith("com.google.android.gms.fitness") ) return true;
         //if( service.name.getClassName().startsWith("com.google.android.gms.matchstick") ) return true;
@@ -520,11 +517,11 @@ public class BaikalActivityServiceStatic {
         if( BaikalSettings.getExtremeIdleEnabled() ) {
 
             if( act != null ) {
-                if( act.startsWith("com.google.firebase") ) return true;
+                //if( act.startsWith("com.google.firebase") ) return true;
                 if( act.startsWith("com.google.android.gms.ads") ) return true;
-                if( act.startsWith("com.google.android.gms.feedback") ) return true;
-                if( act.startsWith("com.google.android.gms.measurement") ) return true;
-                if( act.startsWith("com.google.android.gms.crash") ) return true;
+                //if( act.startsWith("com.google.android.gms.feedback") ) return true;
+                //if( act.startsWith("com.google.android.gms.measurement") ) return true;
+                //if( act.startsWith("com.google.android.gms.crash") ) return true;
             }
         }
 
