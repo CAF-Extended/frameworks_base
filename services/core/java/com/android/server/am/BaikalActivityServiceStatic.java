@@ -151,11 +151,11 @@ public class BaikalActivityServiceStatic {
         if( BaikalConstants.BAIKAL_DEBUG_ACTIVITY ) {
             Slog.d(TAG,"applyOomAdjLocked:" + 
 		        app.info.packageName + "/" + app.uid +
-                ", ps=" + app.getCurProcState() +
-                ", adj=" + app.curAdj +
-                ", ltt=" + app.lastTopTime +
-                ", lpt=" + app.lastProviderTime +
-                ", lat=" + app.lastActivityTime +
+                ", ps=" + app.mState.getCurProcState() +
+                ", adj=" + app.mState.getCurAdj() +
+                ", ltt=" + app.mState.mLastTopTime +
+                ", lpt=" + app.mProviders.mLastProviderTime +
+                ", lat=" + app.mLastActivityTime +
                 ", ot=" + oldTime
 	            );
         }
@@ -178,7 +178,7 @@ public class BaikalActivityServiceStatic {
             case ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND:
 
             if( BaikalSettings.getStaminaMode() ) { 
-                if( BaikalSettings.getAppBlocked(appUid, app.info.packageName) && (app.lastTopTime < oldTimeStamina) ) {
+                if( BaikalSettings.getAppBlocked(appUid, app.info.packageName) && (app.mState.mLastTopTime < oldTimeStamina) ) {
                     Slog.i(TAG,"applyOomAdjLocked: IMP killing blocked app: " + app.info.packageName + "/" + appUid);
                     killApp(app);
                     return 2;
@@ -201,7 +201,7 @@ public class BaikalActivityServiceStatic {
 
                 //if( !BaikalSettings.getExtremeIdleActive() && profile != null && profile.mBackground < 1 ) return 0;
 
-                if( app.lastProviderTime > 0 && app.lastProviderTime < oldTimeProvider ) {
+                if( app.mProviders.mLastProviderTime > 0 && app.mProviders.mLastProviderTime < oldTimeProvider ) {
                     if( BaikalConstants.BAIKAL_DEBUG_ACTIVITY ) Slog.i(TAG,"applyOomAdjLocked: BFGS stamina: active provider " + app.info.packageName + "/" + appUid);
                     return 0;
                 }
@@ -222,10 +222,10 @@ public class BaikalActivityServiceStatic {
 
                 if( !BaikalSettings.getAggressiveIdleEnabled() )  return 0;
 
-                if( app.lastProviderTime > 0 ) {
+                if( app.mProviders.mLastProviderTime > 0 ) {
                     try {
-                        for (int provi = app.pubProviders.size() - 1;provi >= 0;provi--) {
-                            ContentProviderRecord cpr = app.pubProviders.valueAt(provi);
+                        for (int provi = app.mProviders.mPubProviders.size() - 1;provi >= 0;provi--) {
+                            ContentProviderRecord cpr = app.mProviders.mPubProviders.valueAt(provi);
                             for (int i = cpr.connections.size() - 1;i >= 0;i--) {
                                 ContentProviderConnection conn = cpr.connections.get(i);
                                 ProcessRecord client = conn.client;
@@ -241,7 +241,7 @@ public class BaikalActivityServiceStatic {
                     {
                     }
                 }
-                if( BaikalSettings.getAppBlocked(appUid, app.info.packageName) && (app.lastTopTime < oldTimeStamina) ) {
+                if( BaikalSettings.getAppBlocked(appUid, app.info.packageName) && (app.mState.mLastTopTime < oldTimeStamina) ) {
                     Slog.i(TAG,"applyOomAdjLocked: killing blocked app: " + app.info.packageName + "/" + appUid);
                     killApp(app);
                     return 2;
@@ -249,14 +249,14 @@ public class BaikalActivityServiceStatic {
 
                 if( !BaikalSettings.getStaminaMode() && !BaikalSettings.getExtremeIdleEnabled() ) return 0;
 
-                if( BaikalSettings.getAppRestricted(appId,app.info.packageName) && (app.lastTopTime < oldTimeStamina) ) {
+                if( BaikalSettings.getAppRestricted(appId,app.info.packageName) && (app.mState.mLastTopTime < oldTimeStamina) ) {
                     Slog.i(TAG,"applyOomAdjLocked: killing restricted app: " + app.info.packageName + "/" + appUid);
                     killApp(app);
                     return 2;
                 }
 
                 if( app.mState.getCurProcState() == ActivityManager.PROCESS_STATE_LAST_ACTIVITY && 
-                        (BaikalSettings.getStaminaMode() || BaikalSettings.getExtremeIdleActive()) && (app.lastTopTime < oldTime) ) {
+                        (BaikalSettings.getStaminaMode() || BaikalSettings.getExtremeIdleActive()) && (app.mState.mLastTopTime < oldTime) ) {
                     Slog.i(TAG,"applyOomAdjLocked: killing last top app: " + app.info.packageName + "/" + appUid);
                     killApp(app);
                     return 2;
@@ -264,7 +264,7 @@ public class BaikalActivityServiceStatic {
 
 
                 if( app.mState.getCurProcState() == ActivityManager.PROCESS_STATE_LAST_ACTIVITY &&  
-                    BaikalSettings.getExtremeIdleEnabled() && (app.lastTopTime < oldTimeTop) ) {
+                    BaikalSettings.getExtremeIdleEnabled() && (app.mState.mLastTopTime < oldTimeTop) ) {
                     Slog.i(TAG,"applyOomAdjLocked: killing last top app: " + app.info.packageName + "/" + appUid);
                     killApp(app);
                     return 2;
@@ -282,7 +282,7 @@ public class BaikalActivityServiceStatic {
                     }
                 }
 
-                if( (app.mLastActivityTime > activeTime) && pp.mState.getCurAdj() < (ProcessList.CACHED_APP_MIN_ADJ + 40) ) {
+                if( (app.mLastActivityTime > activeTime) && app.mState.getCurAdj() < (ProcessList.CACHED_APP_MIN_ADJ + 40) ) {
                     if( BaikalConstants.BAIKAL_DEBUG_ACTIVITY ) Slog.i(TAG,"applyOomAdjLocked: CEM app is active " + app.info.packageName + "/" + appUid);
                     return 0;
                 }
@@ -320,10 +320,10 @@ public class BaikalActivityServiceStatic {
 
             case ActivityManager.PROCESS_STATE_CACHED_RECENT:
 
-                if( app.lastProviderTime > 0 ) {
+                if( app.mProviders.mLastProviderTime > 0 ) {
                     try {
-                        for (int provi = app.pubProviders.size() - 1;provi >= 0;provi--) {
-                            ContentProviderRecord cpr = app.pubProviders.valueAt(provi);
+                        for (int provi = app.mProviders.mPubProviders.size() - 1;provi >= 0;provi--) {
+                            ContentProviderRecord cpr = app.mProviders.mPubProviders.valueAt(provi);
                             for (int i = cpr.connections.size() - 1;i >= 0;i--) {
                                 ContentProviderConnection conn = cpr.connections.get(i);
                                 ProcessRecord client = conn.client;
@@ -342,13 +342,13 @@ public class BaikalActivityServiceStatic {
 
             case ActivityManager.PROCESS_STATE_CACHED_EMPTY: {
 
-                if( BaikalSettings.getAppBlocked(appUid, app.info.packageName) && (app.lastTopTime < oldTimeStamina) ) {
+                if( BaikalSettings.getAppBlocked(appUid, app.info.packageName) && (app.mState.mLastTopTime < oldTimeStamina) ) {
                     Slog.i(TAG,"applyOomAdjLocked: killing blocked cached app: " + app.info.packageName + "/" + appUid);
                     killApp(app);
                     return 2;
                 }
 
-                if( BaikalSettings.getAppRestricted(appId,app.info.packageName) && (app.lastTopTime < oldTimeStamina) ) {
+                if( BaikalSettings.getAppRestricted(appId,app.info.packageName) && (app.mState.mLastTopTime < oldTimeStamina) ) {
                     Slog.i(TAG,"applyOomAdjLocked: killing restricted cached app: " + app.info.packageName + "/" + appUid);
                     killApp(app);
                     return 2;
@@ -395,8 +395,8 @@ public class BaikalActivityServiceStatic {
 
     private static void killApp(ProcessRecord app) {
         try {
-            for (int is = app.mServices.size()-1;is >= 0; is--) {
-                ServiceRecord s = app.mServices.valueAt(is);
+            for (int is = app.mServices.numberOfRunningServices()-1;is >= 0; is--) {
+                ServiceRecord s = app.mServices.getRunningServiceAt(is);
                 s.delayed = false;
                 s.stopIfKilled = true;
             } 
