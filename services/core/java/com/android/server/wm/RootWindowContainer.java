@@ -2133,6 +2133,9 @@ public class RootWindowContainer extends WindowContainer<DisplayContent>
             final Task rootTask;
             if (singleActivity) {
                 rootTask = task;
+
+                // Apply the last recents animation leash transform to the task entering PIP
+                rootTask.maybeApplyLastRecentsAnimationTransaction();
             } else {
                 // In the case of multiple activities, we will create a new task for it and then
                 // move the PIP activity into the task. Note that we explicitly defer the task
@@ -2337,10 +2340,9 @@ public class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         /* Acquire perf lock *only* during new app launch */
-        if (r != null && !r.isProcessRunning()) {
+        if ((mTmpFindTaskResult.mIdealRecord == null) ||
+            (mTmpFindTaskResult.mIdealRecord.getState() == DESTROYED)) {
             acquireAppLaunchPerfLock(r);
-        } else if (r == null) {
-            Slog.w(TAG, "Should not happen! Didn't apply launch boost");
         }
 
         final ActivityRecord idealMatchActivity = getItemFromTaskDisplayAreas(taskDisplayArea -> {
