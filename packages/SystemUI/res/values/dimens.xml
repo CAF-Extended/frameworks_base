@@ -1586,7 +1586,6 @@
     <dimen name="ongoing_call_chip_icon_text_padding">4dp</dimen>
     <dimen name="ongoing_call_chip_corner_radius">28dp</dimen>
 
-<<<<<<< HEAD
     <!-- Old style mobile data indicators -->
     <dimen name="status_bar_mobile_signal_with_type_width">18dp</dimen>
     <dimen name="status_bar_mobile_signal_width">16dp</dimen>
@@ -1594,7 +1593,6 @@
     <dimen name="status_bar_mobile_type_padding">2dp</dimen>
     <dimen name="status_bar_mobile_type_padding_limit">10dp</dimen>
         
-=======
     <!-- Internet panel related dimensions -->
     <dimen name="internet_dialog_list_margin">12dp</dimen>
     <dimen name="internet_dialog_list_max_height">646dp</dimen>
@@ -1632,5 +1630,4 @@
     <item name="communal_source_height_percentage" format="float" type="dimen">0.80</item>
 
     <dimen name="drag_and_drop_icon_size">70dp</dimen>
->>>>>>> 8b9d937e039f0d770e85eff5d84a49fce14996e1
 </resources>
