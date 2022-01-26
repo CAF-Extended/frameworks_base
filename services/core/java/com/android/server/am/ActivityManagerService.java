@@ -433,6 +433,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.android.internal.baikalos.Actions;
 
 public class ActivityManagerService extends IActivityManager.Stub
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback, ActivityManagerGlobalLock {
@@ -14618,6 +14619,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         mBatteryStatsService.noteEvent(BatteryStats.HistoryItem.EVENT_TOP_START,
                                 mCurResumedPackage, mCurResumedUid);
                     }
+            		Actions.sendTopAppChanged(mCurResumedUid,mCurResumedPackage);                     
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
